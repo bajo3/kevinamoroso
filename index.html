@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kevin Amoroso — Compra y venta de casas en Venado Tuerto | CENTURY 21 Domox</title>
+<meta name="description" content="Asesor inmobiliario en Venado Tuerto. Casas, dúplex y departamentos en venta. Tasación sin cargo y acompañamiento en todo el proceso de compra y venta. CENTURY 21 Domox SA.">
+<meta name="theme-color" content="#3F3F40">
+<link rel="canonical" href="https://kevinamoroso.com.ar/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kevin Amoroso — Compra y venta de casas en Venado Tuerto">
+<meta property="og:description" content="Casas, dúplex y departamentos en venta en Venado Tuerto. Tasación sin cargo. CENTURY 21 Domox SA.">
+<meta property="og:image" content="assets/img/hero.jpg">
+<meta property="og:locale" content="es_AR">
+<link rel="icon" href="assets/img/isotipo.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/Aileron-Regular.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<!-- La pantalla de carga se inyecta antes que nada para evitar el destello de contenido -->
+<script src="assets/js/preloader.js"></script>
+
+<a class="oculto-visual" href="#principal">Ir al contenido principal</a>
+
+<!-- ================================================================ HEADER -->
+<header class="header header--sobre-hero">
+  <div class="header__inner">
+    <a class="marca" href="index.html" aria-label="Kevin Amoroso — CENTURY 21 Domox SA">
+      <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>
+        <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+      </svg>
+      <span class="marca__texto">
+        <span class="marca__c21">CENTURY 21</span>
+        <span class="marca__sub">Domox SA · Kevin Amoroso</span>
+      </span>
+    </a>
+
+    <nav class="header__nav" id="nav-principal" aria-label="Navegación principal">
+      <a href="index.html" aria-current="page">Inicio</a>
+      <a href="propiedades.html">Propiedades</a>
+      <a href="comprar.html">Comprar</a>
+      <a href="vender.html">Vender</a>
+      <a href="nosotros.html">Sobre Kevin</a>
+      <a href="contacto.html">Contacto</a>
+      <a class="btn" data-wa="Hola Kevin, quiero hacerte una consulta sobre una propiedad." href="#" target="_blank" rel="noopener">WhatsApp</a>
+    </nav>
+
+    <div class="header__acciones">
+      <a class="btn btn--linea" href="vender.html">Tasar mi propiedad</a>
+    </div>
+
+    <button class="hamburguesa" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="nav-principal">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<main id="principal">
+
+<!-- ================================================================== HERO -->
+<section class="hero">
+  <div class="hero__fondo">
+    <img src="assets/img/hero.jpg" alt="Casa moderna en venta en Venado Tuerto" fetchpriority="high" width="2200" height="1467">
+  </div>
+  <div class="contenedor hero__inner">
+    <div class="hero__contenido">
+      <span class="eyebrow hero__eyebrow">Venado Tuerto · Santa Fe</span>
+      <h1>Tu próxima casa<br>ya está en <em>Venado Tuerto</em></h1>
+      <p class="hero__texto">
+        Soy Kevin Amoroso, asesor inmobiliario de CENTURY 21 Domox SA. Acompaño a familias e
+        inversores en la compra y venta de propiedades, con datos reales del mercado y sin letra chica.
+      </p>
+      <div class="hero__acciones">
+        <a class="btn btn--grande" href="propiedades.html">Ver propiedades</a>
+        <a class="btn btn--grande btn--fantasma" href="vender.html">Quiero vender</a>
+      </div>
+      <div class="hero__metricas">
+        <div class="hero__metrica"><strong data-m-activas>—</strong><span>Propiedades activas</span></div>
+        <div class="hero__metrica"><strong data-m-zonas>—</strong><span>Barrios cubiertos</span></div>
+        <div class="hero__metrica"><strong data-m-desde>—</strong><span>Casas desde</span></div>
+      </div>
+    </div>
+  </div>
+  <span class="hero__hint" aria-hidden="true">Deslizá<i></i></span>
+</section>
+
+<!-- ============================================================== BUSCADOR -->
+<div class="contenedor">
+  <form class="buscador" data-buscador aria-label="Buscar propiedades">
+    <div class="buscador__grid">
+      <div class="campo">
+        <label for="b-tipo">Tipo de propiedad</label>
+        <select id="b-tipo" name="tipo"></select>
+      </div>
+      <div class="campo">
+        <label for="b-zona">Zona o barrio</label>
+        <select id="b-zona" name="zona"></select>
+      </div>
+      <div class="campo">
+        <label for="b-dorm">Dormitorios</label>
+        <select id="b-dorm" name="dorm">
+          <option value="">Indistinto</option>
+          <option value="1">1 o más</option>
+          <option value="2">2 o más</option>
+          <option value="3">3 o más</option>
+          <option value="4">4 o más</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="b-max">Presupuesto máximo</label>
+        <select id="b-max" name="max">
+          <option value="">Sin tope</option>
+          <option value="60000">Hasta U$D 60.000</option>
+          <option value="100000">Hasta U$D 100.000</option>
+          <option value="150000">Hasta U$D 150.000</option>
+          <option value="200000">Hasta U$D 200.000</option>
+          <option value="300000">Hasta U$D 300.000</option>
+        </select>
+      </div>
+      <button class="btn btn--oscuro" type="submit">Buscar</button>
+    </div>
+  </form>
+</div>
+
+<!-- =========================================================== DESTACADAS -->
+<section class="seccion">
+  <div class="contenedor">
+    <div class="cabecera-seccion cabecera-seccion--fila">
+      <div>
+        <span class="eyebrow">Propiedades destacadas</span>
+        <h2 class="titulo-seccion">Oportunidades <em>seleccionadas</em></h2>
+        <p class="bajada">Unidades que tienen algo que las distingue: ubicación, estado de conservación o precio por debajo del promedio de la zona.</p>
+      </div>
+      <a class="enlace-flecha" href="propiedades.html">Ver todo el catálogo →</a>
+    </div>
+    <div class="grilla grilla--4" data-destacadas></div>
+  </div>
+</section>
+
+<!-- =============================================================== CINTA -->
+<div class="cinta" data-cinta aria-hidden="true"></div>
+
+<!-- ========================================================= ESTADÍSTICAS -->
+<section class="seccion seccion--hueso">
+  <div class="contenedor">
+    <div class="cabecera-seccion cabecera-seccion--fila">
+      <div>
+        <span class="eyebrow">La cartera hoy</span>
+        <h2 class="titulo-seccion">Los números <em>de mi cartera</em></h2>
+        <p class="bajada">Se actualizan solos con cada propiedad que cargo o doy de baja. Sin promedios inflados.</p>
+      </div>
+      <a class="enlace-flecha" href="propiedades.html">Explorar el catálogo →</a>
+    </div>
+
+    <div class="grilla grilla--4">
+      <div class="stat reveal"><strong data-s-total>—</strong><span>Propiedades activas</span><small>disponibles ahora mismo</small></div>
+      <div class="stat reveal"><strong data-s-casas>—</strong><span>Casas en venta</span><small>el foco de mi trabajo</small></div>
+      <div class="stat reveal"><strong data-s-promedio>—</strong><span>Precio promedio de casa</span><small>sobre la cartera actual</small></div>
+      <div class="stat reveal"><strong data-s-estrenar>—</strong><span>Unidades a estrenar</span><small class="sube">listas para habitar</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================= SERVICIOS -->
+<section class="seccion">
+  <div class="contenedor">
+    <div class="cabecera-seccion centro">
+      <span class="eyebrow">Cómo trabajo</span>
+      <h2 class="titulo-seccion">Dos caminos, <em>el mismo acompañamiento</em></h2>
+      <p class="bajada">Comprar y vender una casa son las decisiones económicas más grandes de la mayoría de las familias. Mi trabajo es que llegues a la firma sabiendo exactamente qué estás haciendo.</p>
+    </div>
+
+    <div class="grilla grilla--3">
+      <article class="tarjeta reveal">
+        <div class="tarjeta__icono" data-icono="lupa"></div>
+        <h3>Comprar</h3>
+        <p>Te muestro solo lo que encaja con lo que buscás y con tu presupuesto real. Antes de reservar repasamos gastos, estado del título y plazos de escritura.</p>
+        <p style="margin-top:18px"><a class="enlace-flecha" href="comprar.html">Cómo comprar →</a></p>
+      </article>
+      <article class="tarjeta reveal">
+        <div class="tarjeta__icono" data-icono="grafico"></div>
+        <h3>Vender</h3>
+        <p>Tasación con operaciones cerradas reales de los últimos 12 meses, no con precios de publicación. Fotos profesionales, video y difusión en la red CENTURY 21.</p>
+        <p style="margin-top:18px"><a class="enlace-flecha" href="vender.html">Cómo vender →</a></p>
+      </article>
+      <article class="tarjeta reveal">
+        <div class="tarjeta__icono" data-icono="escudo"></div>
+        <h3>Invertir</h3>
+        <p>Análisis de renta y revalorización por zona. Terrenos, unidades a estrenar y propiedades de doble renta con números puestos sobre la mesa.</p>
+        <p style="margin-top:18px"><a class="enlace-flecha" href="propiedades.html?tipo=terreno">Ver terrenos →</a></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== PROCESO -->
+<section class="seccion seccion--tinta">
+  <div class="contenedor">
+    <div class="cabecera-seccion">
+      <span class="eyebrow">El proceso</span>
+      <h2 class="titulo-seccion">De la primera charla <em>a las llaves</em></h2>
+      <p class="bajada">Cuatro etapas, con plazos y responsabilidades claras desde el día uno.</p>
+    </div>
+    <div class="grilla grilla--4">
+      <article class="paso reveal">
+        <span class="paso__n">01</span>
+        <h3>Diagnóstico</h3>
+        <p>Nos juntamos (presencial o por video) para entender qué buscás o qué querés vender, y en qué plazo.</p>
+      </article>
+      <article class="paso reveal">
+        <span class="paso__n">02</span>
+        <h3>Estrategia</h3>
+        <p>Tasación escrita si vendés; selección filtrada de propiedades si comprás. Todo con números concretos.</p>
+      </article>
+      <article class="paso reveal">
+        <span class="paso__n">03</span>
+        <h3>Negociación</h3>
+        <p>Coordino visitas, presento y defiendo la oferta, y te informo cada movimiento por escrito.</p>
+      </article>
+      <article class="paso reveal">
+        <span class="paso__n">04</span>
+        <h3>Cierre</h3>
+        <p>Reserva, boleto y escritura con escribanía de confianza. Te acompaño hasta la entrega de posesión.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- =============================================================== PERFIL -->
+<section class="seccion">
+  <div class="contenedor">
+    <div class="perfil">
+      <div class="perfil__foto reveal">
+        <img src="assets/img/kevin.svg" alt="Kevin Amoroso, asesor inmobiliario en Venado Tuerto" width="800" height="1000">
+      </div>
+      <div class="reveal">
+        <span class="eyebrow">Sobre mí</span>
+        <h2 class="titulo-seccion">Un asesor, <em>no un cartel más</em></h2>
+        <p class="bajada">
+          Trabajo en Venado Tuerto dentro de CENTURY 21 Domox SA, la franquicia local de la red inmobiliaria
+          más grande del mundo. Eso significa metodología, herramientas y respaldo internacional; pero del
+          otro lado del teléfono siempre estoy yo, con nombre y apellido.
+        </p>
+        <ul class="lista-check">
+          <li><span data-icono="check"></span><span>Atención personal: la misma persona te tasa, te muestra y te acompaña a la escritura.</span></li>
+          <li><span data-icono="check"></span><span>Tasaciones basadas en operaciones cerradas, no en precios de publicación inflados.</span></li>
+          <li><span data-icono="check"></span><span>Informe de avance por escrito cada semana mientras tu propiedad esté publicada.</span></li>
+          <li><span data-icono="check"></span><span>Red CENTURY 21: tu propiedad llega también a compradores de otras ciudades.</span></li>
+        </ul>
+        <div class="perfil__firma">
+          <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>
+            <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+          </svg>
+          <p><strong>Kevin Amoroso</strong>Asesor inmobiliario · CENTURY 21 Domox SA</p>
+        </div>
+        <p style="margin-top:28px"><a class="btn" href="nosotros.html">Conocer más</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================== CATEGORÍAS -->
+<section class="seccion seccion--hueso">
+  <div class="contenedor">
+    <div class="cabecera-seccion centro">
+      <span class="eyebrow">Categorías</span>
+      <h2 class="titulo-seccion">Filtrá por <em>tipo de propiedad</em></h2>
+      <p class="bajada">Elegí una categoría para ver todo lo disponible en Venado Tuerto y la región.</p>
+    </div>
+    <div class="grilla grilla--4 grilla--categorias" data-categorias></div>
+  </div>
+</section>
+
+<!-- ================================================================ ZONAS -->
+<section class="seccion">
+  <div class="contenedor">
+    <div class="cabecera-seccion cabecera-seccion--fila">
+      <div>
+        <span class="eyebrow">Barrios</span>
+        <h2 class="titulo-seccion">Encontrá tu casa <em>en tu barrio</em></h2>
+        <p class="bajada">Conozco los valores metro a metro. Elegí una zona y mirá qué hay disponible hoy.</p>
+      </div>
+      <a class="enlace-flecha" href="propiedades.html">Ver todas las zonas →</a>
+    </div>
+    <div class="grilla grilla--4 grilla--zonas" data-zonas></div>
+  </div>
+</section>
+
+<!-- ========================================================== TESTIMONIOS -->
+<section class="seccion seccion--hueso">
+  <div class="contenedor">
+    <div class="cabecera-seccion centro">
+      <span class="eyebrow">Testimonios</span>
+      <h2 class="titulo-seccion">Lo que dicen <em>quienes ya cerraron</em></h2>
+    </div>
+    <div class="grilla grilla--3" data-testimonios></div>
+  </div>
+</section>
+
+<!-- =============================================================== FRANJA -->
+<section class="seccion franja">
+  <svg class="franja__asterisco" viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="currentColor"><rect x="42" y="4" width="16" height="92"/><rect x="4" y="42" width="92" height="16"/>
+    <rect x="42" y="4" width="16" height="92" transform="rotate(45 50 50)"/><rect x="4" y="42" width="92" height="16" transform="rotate(45 50 50)"/></g>
+  </svg>
+  <svg class="franja__asterisco franja__asterisco--2" viewBox="0 0 100 100" aria-hidden="true">
+    <g fill="currentColor"><rect x="42" y="4" width="16" height="92"/><rect x="4" y="42" width="92" height="16"/>
+    <rect x="42" y="4" width="16" height="92" transform="rotate(45 50 50)"/><rect x="4" y="42" width="92" height="16" transform="rotate(45 50 50)"/></g>
+  </svg>
+  <div class="contenedor cabecera-seccion--fila" style="display:flex;align-items:center;justify-content:space-between;gap:36px;flex-wrap:wrap">
+    <div>
+      <h2>¿Cuánto vale tu propiedad hoy?</h2>
+      <p>Tasación sin cargo y sin compromiso de exclusividad. Visito la propiedad, comparo con operaciones reales cerradas en tu zona y te entrego un informe escrito.</p>
+    </div>
+    <a class="btn btn--grande btn--fantasma" href="vender.html">Pedir tasación gratis</a>
+  </div>
+</section>
+
+<!-- ================================================================== FAQ -->
+<section class="seccion">
+  <div class="contenedor">
+    <div class="cabecera-seccion centro">
+      <span class="eyebrow">Preguntas frecuentes</span>
+      <h2 class="titulo-seccion">Lo que <em>siempre</em> me preguntan</h2>
+    </div>
+    <div class="faq" data-faq></div>
+  </div>
+</section>
+
+<!-- ============================================================= CONTACTO -->
+<section class="seccion seccion--hueso" id="contacto">
+  <div class="contenedor">
+    <div class="grilla grilla--2" style="align-items:start;gap:48px">
+      <div class="reveal">
+        <span class="eyebrow">Hablemos</span>
+        <h2 class="titulo-seccion">Contame <em>qué necesitás</em></h2>
+        <p class="bajada">Respondo personalmente todos los mensajes. Si preferís, escribime directo por WhatsApp y lo resolvemos ahí mismo.</p>
+
+        <div class="contacto-panel" style="margin-top:32px">
+          <div class="dato">
+            <span class="dato__icono" data-icono="wa"></span>
+            <div><strong>WhatsApp</strong><a data-wa="Hola Kevin, te escribo desde la web." href="#" target="_blank" rel="noopener">Escribirme ahora</a></div>
+          </div>
+          <div class="dato">
+            <span class="dato__icono" data-icono="tel"></span>
+            <div><strong>Teléfono</strong><a data-tel href="#">—</a></div>
+          </div>
+          <div class="dato">
+            <span class="dato__icono" data-icono="mail"></span>
+            <div><strong>Email</strong><a data-email href="#">—</a></div>
+          </div>
+          <div class="dato">
+            <span class="dato__icono" data-icono="reloj"></span>
+            <div><strong>Horarios</strong><p>Lunes a viernes de 9 a 13 y de 16 a 20 h · Sábados de 9 a 13 h</p></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="tarjeta reveal" data-form="Consulta desde la web">
+        <h3 style="font-size:21px;margin-bottom:22px">Dejame tu consulta</h3>
+        <div class="form-grid">
+          <div class="campo"><label for="c-nombre">Nombre y apellido *</label><input id="c-nombre" name="nombre" type="text" required autocomplete="name"></div>
+          <div class="campo"><label for="c-tel">Teléfono *</label><input id="c-tel" name="telefono" type="tel" required autocomplete="tel"></div>
+          <div class="campo ancho-total"><label for="c-mail">Email</label><input id="c-mail" name="email" type="email" autocomplete="email"></div>
+          <div class="campo ancho-total">
+            <label for="c-motivo">¿Qué querés hacer?</label>
+            <select id="c-motivo" name="motivo">
+              <option>Comprar una propiedad</option>
+              <option>Vender mi propiedad</option>
+              <option>Tasar mi propiedad</option>
+              <option>Invertir</option>
+              <option>Otra consulta</option>
+            </select>
+          </div>
+          <div class="campo ancho-total"><label for="c-msg">Mensaje</label><textarea id="c-msg" name="mensaje" placeholder="Contame qué estás buscando, en qué zona y con qué presupuesto."></textarea></div>
+          <div class="campo campo--check ancho-total">
+            <input id="c-ok" name="acepta" type="checkbox" required>
+            <label for="c-ok">Acepto ser contactado por Kevin Amoroso para responder esta consulta.</label>
+          </div>
+          <div class="ancho-total"><button class="btn btn--bloque btn--grande" type="submit">Enviar consulta</button></div>
+        </div>
+        <p class="aviso-form" hidden></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================================================================ FOOTER -->
+<footer class="footer">
+  <div class="contenedor">
+    <div class="footer__top">
+      <div>
+        <span class="marca">
+          <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
+            <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>
+            <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+          </svg>
+          <span class="marca__texto">
+            <span class="marca__c21">CENTURY 21</span>
+            <span class="marca__sub">Domox SA</span>
+          </span>
+        </span>
+        <p class="footer__desc">Kevin Amoroso, asesor inmobiliario en Venado Tuerto. Compra y venta de casas, dúplex, departamentos, terrenos y campos.</p>
+        <div class="redes">
+          <a data-ig href="#" aria-label="Instagram" target="_blank" rel="noopener"><span data-icono="ig"></span></a>
+          <a data-fb href="#" aria-label="Facebook" target="_blank" rel="noopener"><span data-icono="fb"></span></a>
+          <a data-li href="#" aria-label="LinkedIn" target="_blank" rel="noopener"><span data-icono="in"></span></a>
+          <a data-wa="Hola Kevin, te escribo desde la web." href="#" aria-label="WhatsApp" target="_blank" rel="noopener"><span data-icono="wa"></span></a>
+        </div>
+      </div>
+
+      <div>
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="comprar.html">Comprar</a></li>
+          <li><a href="vender.html">Vender</a></li>
+          <li><a href="vender.html#tasacion">Tasaciones</a></li>
+          <li><a href="propiedades.html?tipo=terreno">Invertir</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Propiedades</h4>
+        <ul>
+          <li><a href="propiedades.html?tipo=casa">Casas</a></li>
+          <li><a href="propiedades.html?tipo=duplex">Dúplex</a></li>
+          <li><a href="propiedades.html?tipo=depto">Departamentos</a></li>
+          <li><a href="propiedades.html?tipo=terreno">Terrenos</a></li>
+          <li><a href="propiedades.html?tipo=campo">Campos</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4>Contacto</h4>
+        <ul>
+          <li><a data-wa="Hola Kevin, te escribo desde la web." href="#" target="_blank" rel="noopener">WhatsApp directo</a></li>
+          <li><a data-tel href="#">—</a></li>
+          <li><a data-email href="#">—</a></li>
+          <li style="margin-top:16px"><p>Venado Tuerto, Santa Fe<br>Argentina</p></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p>© <span data-anio>2026</span> Kevin Amoroso · CENTURY 21 Domox SA. Todos los derechos reservados.</p>
+      <p>Cada oficina CENTURY 21 es de propiedad y operación independiente.</p>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-flotante" data-wa="Hola Kevin, te escribo desde la web." href="#" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp">
+  <span data-icono="wa"></span>
+</a>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "RealEstateAgent",
+  "name": "Kevin Amoroso — CENTURY 21 Domox SA",
+  "description": "Asesor inmobiliario en Venado Tuerto. Compra y venta de casas, dúplex, departamentos, terrenos y campos.",
+  "areaServed": { "@type": "City", "name": "Venado Tuerto" },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Venado Tuerto",
+    "addressRegion": "Santa Fe",
+    "addressCountry": "AR"
+  },
+  "email": "kevin.amoroso@c21domox.com.ar",
+  "telephone": "+54 9 3462 31-1516",
+  "priceRange": "USD"
+}
+</script>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

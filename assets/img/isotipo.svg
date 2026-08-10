@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Century 21">
+  <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="butt"/>
+  <text x="53" y="66" font-family="Aileron, Helvetica, Arial, sans-serif" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+</svg>

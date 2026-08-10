@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Retrato de Kevin Amoroso (imagen de reemplazo)">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D9CEB4"/>
+      <stop offset="55%" stop-color="#BEAE89"/>
+      <stop offset="100%" stop-color="#A2916B"/>
+    </linearGradient>
+    <clipPath id="c"><rect width="800" height="1000"/></clipPath>
+  </defs>
+  <g clip-path="url(#c)">
+    <rect width="800" height="1000" fill="url(#g)"/>
+    <g fill="#FFFFFF" opacity=".13">
+      <rect x="620" y="60" width="46" height="260"/>
+      <rect x="513" y="167" width="260" height="46"/>
+      <rect x="620" y="60" width="46" height="260" transform="rotate(45 643 190)"/>
+      <rect x="513" y="167" width="260" height="46" transform="rotate(45 643 190)"/>
+    </g>
+    <!-- Silueta -->
+    <g fill="#FFFFFF" opacity=".26">
+      <circle cx="400" cy="440" r="122"/>
+      <path d="M400 592c-138 0-250 96-250 214v194h500V806c0-118-112-214-250-214Z"/>
+    </g>
+    <g fill="#3F3F40" opacity=".55" font-family="Aileron, Helvetica, Arial, sans-serif" text-anchor="middle">
+      <text x="400" y="905" font-size="30" font-weight="700" letter-spacing="6">KEVIN AMOROSO</text>
+      <text x="400" y="945" font-size="19" letter-spacing="3">Reemplazar por foto profesional</text>
+    </g>
+  </g>
+</svg>
