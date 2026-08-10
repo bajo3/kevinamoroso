@@ -27,13 +27,6 @@
   overlay.setAttribute('aria-live', 'polite');
   overlay.setAttribute('aria-label', 'Cargando el sitio');
   overlay.innerHTML =
-    '<svg class="precarga__asterisco" viewBox="0 0 100 100" aria-hidden="true">' +
-      '<g fill="currentColor">' +
-        '<rect x="42" y="4" width="16" height="92"/><rect x="4" y="42" width="92" height="16"/>' +
-        '<rect x="42" y="4" width="16" height="92" transform="rotate(45 50 50)"/>' +
-        '<rect x="4" y="42" width="92" height="16" transform="rotate(45 50 50)"/>' +
-      '</g>' +
-    '</svg>' +
     '<div class="precarga__caja">' +
       '<div class="precarga__anillo">' +
         '<svg viewBox="0 0 120 120" aria-hidden="true">' +

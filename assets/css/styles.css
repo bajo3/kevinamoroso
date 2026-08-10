@@ -510,16 +510,14 @@ html.cargando, html.cargando body { overflow: hidden; }
   background:
     radial-gradient(60% 50% at 50% 42%, rgba(190,174,137,.16), transparent 70%);
 }
-.precarga__asterisco {
-  position: absolute; width: 46vmin; height: 46vmin; color: var(--oro);
-  opacity: .07; animation: girar 26s linear infinite;
-}
 .precarga.oculta { opacity: 0; visibility: hidden; }
 
 .precarga__caja { position: relative; display: grid; justify-items: center; gap: 26px; }
 
 .precarga__anillo { position: relative; width: 176px; height: 176px; }
-.precarga__anillo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+/* Sólo el SVG del anillo se gira, para que el progreso arranque a las 12.
+   Con selector descendente también giraba el sello del logo que va adentro. */
+.precarga__anillo > svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .precarga__pista  { fill: none; stroke: var(--oro-claro); stroke-width: 3; opacity: .45; }
 .precarga__arco   {
   fill: none; stroke: var(--oro); stroke-width: 3; stroke-linecap: round;
@@ -549,7 +547,6 @@ html.cargando, html.cargando body { overflow: hidden; }
 .precarga__estado b:nth-child(3) { animation-delay: .36s; }
 
 @keyframes latir { 0%, 60%, 100% { opacity: .25; } 30% { opacity: 1; } }
-@keyframes girar { to { transform: rotate(360deg); } }
 
 /* ---------- Transición entre páginas ---------- */
 .transicion {
@@ -704,7 +701,6 @@ img[data-fade].cargada { opacity: 1; filter: none; transform: none; }
   .reveal-mask { opacity: 1; clip-path: none; transform: none; }
   img[data-fade] { opacity: 1; filter: none; transform: none; }
   .cinta__pista { animation: none; }
-  .precarga__asterisco { animation: none; }
   html.listo main, html.listo .header, html.listo .footer { animation: none; }
 }
 
