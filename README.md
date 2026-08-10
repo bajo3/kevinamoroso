@@ -96,9 +96,16 @@ Buscá la palabra **`PENDIENTE`**:
 4. **`matricula`** — número de matrícula del Colegio de Corredores Inmobiliarios de Santa Fe.
 5. **`direccionDetalle`** — calle y número de la sucursal.
 6. **Redes** — `instagram`, `facebook`, `linkedin` apuntan hoy a la home de cada red.
-7. **Foto de Kevin** — `assets/img/kevin.svg` es un marcador de posición diseñado.
-   Reemplazalo por una foto profesional (recomendado: JPG vertical 4:5, ~1200×1500 px)
-   y actualizá la ruta en `index.html`, `nosotros.html` y `propiedad.html`.
+7. **Foto de Kevin** — guardá el retrato como **`assets/img/kevin.jpg`** y listo:
+   las tres páginas que lo muestran (`nosotros.html`, `index.html` y `propiedad.html`)
+   ya apuntan a ese archivo. Mientras no exista, cada `<img>` cae automáticamente
+   al marcador de posición `assets/img/kevin.svg`, así que el sitio nunca queda
+   con una imagen rota.
+
+   Formato recomendado: JPG, vertical 4:5 o cuadrado, entre 1000 y 1600 px de
+   ancho, con la cara en el centro. En la ficha de propiedad se recorta en
+   círculo de 56 px, y en el perfil a 4:5 (se recorta a los costados, nunca arriba
+   ni abajo).
 
 ### Sobre las propiedades y los testimonios
 
