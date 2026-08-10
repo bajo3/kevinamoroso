@@ -20,6 +20,8 @@
 
 <!-- La pantalla de carga se inyecta antes que nada para evitar el destello de contenido -->
 <script src="assets/js/preloader.js"></script>
+<!-- Registro de metricas: visitas, clics de WhatsApp y consultas -->
+<script src="assets/js/analytics.js"></script>
 
 <a class="oculto-visual" href="#principal">Ir al contenido principal</a>
 
@@ -76,7 +78,7 @@
         <a class="btn btn--grande" href="propiedades.html">Ver propiedades</a>
         <a class="btn btn--grande btn--fantasma" href="vender.html">Quiero vender</a>
       </div>
-      <div class="hero__metricas">
+      <div class="hero__metricas" data-oculto-sin-propiedades>
         <div class="hero__metrica"><strong data-m-activas>—</strong><span>Propiedades activas</span></div>
         <div class="hero__metrica"><strong data-m-zonas>—</strong><span>Barrios cubiertos</span></div>
         <div class="hero__metrica"><strong data-m-desde>—</strong><span>Casas desde</span></div>
@@ -87,7 +89,7 @@
 </section>
 
 <!-- ============================================================== BUSCADOR -->
-<div class="contenedor">
+<div class="contenedor" data-oculto-sin-propiedades>
   <form class="buscador" data-buscador aria-label="Buscar propiedades">
     <div class="buscador__grid">
       <div class="campo">
@@ -133,7 +135,7 @@
         <h2 class="titulo-seccion">Oportunidades <em>seleccionadas</em></h2>
         <p class="bajada">Unidades que tienen algo que las distingue: ubicación, estado de conservación o precio por debajo del promedio de la zona.</p>
       </div>
-      <a class="enlace-flecha" href="propiedades.html">Ver todo el catálogo →</a>
+      <a class="enlace-flecha" href="propiedades.html" data-oculto-sin-propiedades>Ver todo el catálogo →</a>
     </div>
     <div class="grilla grilla--4" data-destacadas></div>
   </div>
@@ -143,7 +145,7 @@
 <div class="cinta" data-cinta aria-hidden="true"></div>
 
 <!-- ========================================================= ESTADÍSTICAS -->
-<section class="seccion seccion--hueso">
+<section class="seccion seccion--hueso" data-oculto-sin-propiedades>
   <div class="contenedor">
     <div class="cabecera-seccion cabecera-seccion--fila">
       <div>
@@ -264,7 +266,7 @@
 </section>
 
 <!-- =========================================================== CATEGORÍAS -->
-<section class="seccion seccion--hueso">
+<section class="seccion seccion--hueso" data-oculto-sin-propiedades>
   <div class="contenedor">
     <div class="cabecera-seccion centro">
       <span class="eyebrow">Categorías</span>
@@ -276,7 +278,7 @@
 </section>
 
 <!-- ================================================================ ZONAS -->
-<section class="seccion">
+<section class="seccion" data-oculto-sin-propiedades>
   <div class="contenedor">
     <div class="cabecera-seccion cabecera-seccion--fila">
       <div>

@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /admin.html
 
-Sitemap: https://kevinamoroso.com.ar/sitemap.xml
+Sitemap: https://kevinamoroso.vercel.app/sitemap.xml

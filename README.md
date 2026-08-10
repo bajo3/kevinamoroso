@@ -57,11 +57,71 @@ contacto.html       Datos de contacto, mapa y formulario
 assets/css/styles.css   Sistema visual completo
 assets/js/data.js       ← CONFIGURACIÓN Y PROPIEDADES (editá acá)
 assets/js/main.js       Lógica: filtros, galería, formularios, favoritos
+admin.html          Panel de métricas (también accesible en /admin)
+
 assets/js/preloader.js  Pantalla de carga + transición entre páginas
+assets/js/analytics.js  ← REGISTRO DE MÉTRICAS (acá van las claves de Supabase)
+assets/js/admin.js      Lógica del panel
+assets/css/admin.css    Estilos del panel
 assets/fonts/           Aileron (.woff)
 assets/img/             Hero, retrato, zonas y fotos de propiedades
-vercel.json             Cabeceras de caché y seguridad
+supabase/schema.sql     Tablas, políticas y vistas listas para ejecutar
+vercel.json             Ruta /admin, cabeceras de caché y seguridad
 ```
+
+---
+
+## Panel de métricas — `/admin`
+
+https://kevinamoroso.vercel.app/admin · usuario **admin** · contraseña **admin**
+
+Muestra, para el período elegido (7 / 30 / 90 días o todo):
+
+- Visitantes únicos, visitas de página y vistas de ficha de propiedad
+- Clics en WhatsApp y consultas enviadas por formulario
+- Conversión: qué porcentaje de personas intentó contactar
+- Porcentaje de visitas desde el celular
+- Gráfico de visitas por día
+- Ranking de propiedades más vistas, con sus clics de WhatsApp
+- Páginas más visitadas y de dónde llega la gente (Google, Instagram, directo…)
+- Últimos 40 movimientos, exportables a CSV
+
+### ⚠️ Dos limitaciones mientras no esté Supabase
+
+1. **El acceso no es seguridad real.** Usuario y contraseña se comparan en el
+   navegador y el código de la página es público, así que sirve para que el panel
+   no quede a la vista, pero alguien decidido puede saltearlo. Se reemplaza por
+   Supabase Auth.
+
+2. **Los datos son de un solo navegador.** En modo `local` cada visitante guarda
+   sus eventos en SU equipo, así que el panel sólo muestra la actividad de quien
+   lo abre. Para medir a todos los visitantes hace falta Supabase.
+
+### Cómo conectar Supabase (10 minutos)
+
+1. En Supabase → **SQL Editor** → pegar todo `supabase/schema.sql` → **Run**.
+   Crea las tablas `eventos` y `propiedades`, las políticas de acceso y dos
+   vistas de resumen.
+2. En **Project Settings → API** copiar la *Project URL* y la *anon public key*.
+3. Pegarlas en `assets/js/analytics.js`, en `CONFIG_METRICAS`:
+
+   ```js
+   adaptador: 'supabase',
+   supabaseUrl: 'https://xxxxxxxx.supabase.co',
+   supabaseAnonKey: 'eyJhbGciOi...'
+   ```
+
+4. `git push` — Vercel publica solo.
+
+La tabla `eventos` queda con RLS: el sitio público **sólo puede insertar**, no
+leer. Por eso, para que el panel lea los datos hace falta el paso siguiente:
+activar Supabase Auth y crear el usuario de Kevin. Ese es el cambio que reemplaza
+al `admin/admin` provisorio.
+
+### Storage de fotos
+
+En Supabase → **Storage** → crear un bucket público llamado `propiedades`.
+Las URLs completas de las fotos se guardan en la columna `imagenes` de la tabla.
 
 ---
 
@@ -107,21 +167,25 @@ Buscá la palabra **`PENDIENTE`**:
    círculo de 56 px, y en el perfil a 4:5 (se recorta a los costados, nunca arriba
    ni abajo).
 
-### Sobre las propiedades y los testimonios
+### Estado del catálogo
 
-El catálogo de `PROPIEDADES` y los `TESTIMONIOS` son **contenido de muestra**
-escrito para que el sitio se vea completo: direcciones, precios y textos son
-verosímiles pero inventados. Hay que reemplazarlos por publicaciones reales
-antes de poner el sitio online.
+`PROPIEDADES` está **vacío**: las publicaciones se van a cargar desde Supabase.
+Mientras no haya ninguna, el sitio se adapta solo — se ocultan el buscador, las
+estadísticas, las categorías y los barrios, y en su lugar aparece un bloque de
+"Estamos preparando el catálogo" con acceso directo a WhatsApp. Apenas entre la
+primera propiedad, todas esas secciones reaparecen sin tocar nada.
 
-Las fotos provienen de Unsplash (licencia libre) y funcionan como placeholder
-hasta tener la producción fotográfica propia.
+Los `TESTIMONIOS` siguen siendo **contenido de muestra** y hay que reemplazarlos
+por reseñas reales. Las fotos de `assets/img/` son de Unsplash (licencia libre) y
+se usan como fondo de las portadas y de los barrios.
 
 ---
 
-## Cargar una propiedad nueva
+## Cargar una propiedad a mano
 
-Agregá un objeto al array `PROPIEDADES` en `assets/js/data.js`:
+Mientras Supabase no esté conectado, se puede sumar una publicación agregando un
+objeto al array `PROPIEDADES` en `assets/js/data.js` (hay una plantilla comentada
+adentro del array):
 
 ```js
 {

@@ -380,12 +380,41 @@
     });
   }
 
+  /* ---------------------------------------------- Catálogo sin publicaciones */
+  const selloSVG =
+    '<svg class="catalogo-vacio__sello" viewBox="0 0 100 100" aria-hidden="true">' +
+      '<path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>' +
+      '<text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>' +
+    '</svg>';
+
+  function bloqueCatalogoVacio(titulo, texto) {
+    return `
+      <div class="catalogo-vacio">
+        ${selloSVG}
+        <h3>${esc(titulo)}</h3>
+        <p>${esc(texto)}</p>
+        <div class="catalogo-vacio__acciones">
+          <a class="btn" data-wa="Hola Kevin, quiero que me avises cuando publiques propiedades." href="#" target="_blank" rel="noopener">Avisame cuando publiques</a>
+          <a class="btn btn--linea" href="vender.html">Quiero vender mi propiedad</a>
+        </div>
+      </div>`;
+  }
+
   /* =======================================================================
      PÁGINA: INICIO
      ======================================================================= */
   function initInicio() {
     const cont = $('[data-destacadas]');
     if (!cont) return;
+
+    if (!PROPIEDADES.length) {
+      cont.innerHTML = bloqueCatalogoVacio(
+        'Estamos preparando el catálogo',
+        'Las publicaciones se están cargando en el sistema. Si buscás algo puntual, escribime y te aviso apenas entre una propiedad que encaje con lo que necesitás.'
+      );
+      initDatosMarca();
+      return;
+    }
 
     const destacadas = PROPIEDADES
       .filter(p => p.destacada && p.estado !== 'vendida')
@@ -534,11 +563,18 @@
         : '<strong>0</strong> resultados';
       grid.innerHTML = r.length
         ? r.map(tarjetaPropiedad).join('')
-        : `<div class="sin-resultados" style="grid-column:1/-1">
-             <h3>No encontramos propiedades con esos filtros</h3>
-             <p>Probá ampliar el rango de precio o quitar alguna condición. También podés contarnos qué buscás y te avisamos cuando entre algo.</p>
-             <a class="btn" data-wa="Hola Kevin, no encontré lo que busco en la web. Te cuento qué necesito:" href="#" target="_blank" rel="noopener">Contarle a Kevin qué busco</a>
-           </div>`;
+        : (PROPIEDADES.length
+            // Hay catálogo, pero los filtros no devolvieron nada
+            ? `<div class="sin-resultados" style="grid-column:1/-1">
+                 <h3>No encontramos propiedades con esos filtros</h3>
+                 <p>Probá ampliar el rango de precio o quitar alguna condición. También podés contarnos qué buscás y te avisamos cuando entre algo.</p>
+                 <a class="btn" data-wa="Hola Kevin, no encontré lo que busco en la web. Te cuento qué necesito:" href="#" target="_blank" rel="noopener">Contarle a Kevin qué busco</a>
+               </div>`
+            // Todavía no hay ninguna publicación cargada
+            : bloqueCatalogoVacio(
+                'Estamos preparando el catálogo',
+                'Las publicaciones se están cargando en el sistema. Contame qué estás buscando y te aviso apenas entre una propiedad que encaje.'
+              ));
       grid.querySelectorAll('.reveal').forEach(e => e.classList.add('visible'));
       pintarFavoritos(grid);
       initFadeImagenes(grid);
@@ -702,6 +738,10 @@
 
   /* ============================================================== Arranque */
   document.addEventListener('DOMContentLoaded', function () {
+    // Marca el documento cuando todavía no hay publicaciones cargadas, para que
+    // las secciones que dependen del catálogo se oculten en vez de mostrar ceros.
+    document.documentElement.classList.toggle('sin-propiedades', !PROPIEDADES.length);
+
     // Estructura y contenido
     initHeader();
     initDatosMarca();

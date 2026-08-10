@@ -629,6 +629,22 @@ img[data-fade].cargada { opacity: 1; filter: none; transform: none; }
 .stat { transition: transform .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease); }
 .stat:hover { transform: translateY(-4px); border-color: var(--oro-claro); box-shadow: var(--sombra-s); }
 
+/* ---------- Catálogo todavía sin publicaciones ---------- */
+/* main.js pone la clase en <html> cuando PROPIEDADES está vacío, para que las
+   secciones que dependen del catálogo no queden mostrando ceros. */
+html.sin-propiedades [data-oculto-sin-propiedades] { display: none !important; }
+
+.catalogo-vacio {
+  grid-column: 1 / -1;
+  display: grid; justify-items: center; gap: 16px; text-align: center;
+  padding: clamp(48px, 7vw, 84px) 28px;
+  background: var(--hueso); border: 1px dashed var(--oro-claro); border-radius: var(--radio-md);
+}
+.catalogo-vacio__sello { width: 54px; height: 54px; color: var(--oro); }
+.catalogo-vacio h3 { font-size: clamp(20px, 2.4vw, 26px); }
+.catalogo-vacio p { max-width: 56ch; color: var(--gris); font-size: 16px; }
+.catalogo-vacio__acciones { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+
 /* ---------- Migas ---------- */
 .migas { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; color: var(--gris); padding-block: 22px; }
 .migas a:hover { color: var(--oro-osc); }

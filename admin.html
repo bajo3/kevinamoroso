@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de métricas — Kevin Amoroso | CENTURY 21 Domox</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#3F3F40">
+<link rel="icon" href="assets/img/isotipo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body class="admin">
+
+<!-- ================================================================ ACCESO -->
+<div class="acceso" id="acceso">
+  <div class="acceso__caja">
+    <div class="acceso__marca">
+      <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>
+        <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+      </svg>
+      <div>
+        <h1>Panel de métricas</h1>
+        <p>Kevin Amoroso · CENTURY 21 Domox SA</p>
+      </div>
+    </div>
+
+    <form id="form-acceso" autocomplete="off">
+      <div class="campo">
+        <label for="usuario">Usuario</label>
+        <input id="usuario" name="usuario" type="text" required autocomplete="username">
+      </div>
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <input id="clave" name="clave" type="password" required autocomplete="current-password">
+      </div>
+      <p class="acceso__error" id="acceso-error" hidden></p>
+      <button class="btn btn--bloque btn--grande" type="submit">Entrar</button>
+    </form>
+
+    <p class="acceso__nota">
+      <strong>Acceso provisorio.</strong> La verificación ocurre en el navegador, así que
+      sirve para que el panel no quede a la vista de cualquiera, pero no es una barrera
+      de seguridad real: quien mire el código de la página puede saltearla. Cuando
+      conectemos Supabase se reemplaza por autenticación de verdad.
+    </p>
+  </div>
+</div>
+
+<!-- ================================================================= PANEL -->
+<div class="panel" id="panel">
+
+  <div class="panel__barra">
+    <div class="contenedor">
+      <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 6a44 44 0 1 0 44 44" fill="none" stroke="currentColor" stroke-width="7"/>
+        <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
+      </svg>
+      <div class="panel__titulo">
+        <span>CENTURY 21 Domox SA</span>
+        Panel de métricas
+      </div>
+
+      <div class="panel__acciones">
+        <select id="rango" aria-label="Período">
+          <option value="7">Últimos 7 días</option>
+          <option value="30" selected>Últimos 30 días</option>
+          <option value="90">Últimos 90 días</option>
+          <option value="0">Todo el histórico</option>
+        </select>
+        <button class="btn btn--linea" type="button" id="btn-refrescar">Refrescar</button>
+        <button class="btn btn--linea" type="button" id="btn-csv">Exportar CSV</button>
+        <button class="btn btn--oscuro" type="button" id="btn-salir">Salir</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="contenedor panel__cuerpo">
+
+    <div id="aviso-modo"></div>
+
+    <div class="panel__seccion" style="margin-top:26px">
+      <h2>Resumen del período</h2>
+      <div class="kpis" id="kpis"></div>
+    </div>
+
+    <div class="panel__seccion">
+      <h2>Visitas por día</h2>
+      <div class="grafico"><div id="grafico"></div></div>
+    </div>
+
+    <div class="panel__seccion">
+      <h2>Propiedades más vistas</h2>
+      <div class="tabla-caja" id="tabla-propiedades"></div>
+    </div>
+
+    <div class="panel__seccion">
+      <h2>Páginas más visitadas</h2>
+      <div class="tabla-caja" id="tabla-paginas"></div>
+    </div>
+
+    <div class="panel__seccion">
+      <h2>De dónde llegan</h2>
+      <div class="tabla-caja" id="tabla-origen"></div>
+    </div>
+
+    <div class="panel__seccion">
+      <h2>Últimos movimientos</h2>
+      <div class="tabla-caja" id="tabla-eventos"></div>
+    </div>
+
+    <div class="panel__pie">
+      <span id="pie-info">—</span>
+      <button class="btn btn--linea" type="button" id="btn-borrar" style="padding:8px 14px;font-size:11px">Borrar datos locales</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/js/analytics.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>
