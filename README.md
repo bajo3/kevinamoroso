@@ -7,6 +7,12 @@ BrandBook *Identidad Visual Redes* de CENTURY 21 Domox SA.
 
 HTML, CSS y JavaScript puros. Sin build, sin dependencias, sin backend.
 
+**En línea:** https://kevinamoroso.vercel.app
+**Repositorio:** https://github.com/bajo3/kevinamoroso
+
+El proyecto de Vercel está conectado al repo: cada `git push` a `main`
+publica automáticamente. Para desplegar a mano: `vercel deploy --prod`.
+
 ---
 
 ## Cómo verlo
@@ -51,9 +57,30 @@ contacto.html       Datos de contacto, mapa y formulario
 assets/css/styles.css   Sistema visual completo
 assets/js/data.js       ← CONFIGURACIÓN Y PROPIEDADES (editá acá)
 assets/js/main.js       Lógica: filtros, galería, formularios, favoritos
+assets/js/preloader.js  Pantalla de carga + transición entre páginas
 assets/fonts/           Aileron (.woff)
 assets/img/             Hero, retrato, zonas y fotos de propiedades
+vercel.json             Cabeceras de caché y seguridad
 ```
+
+---
+
+## Efectos e interacción
+
+| Efecto | Dónde | Detalle |
+|---|---|---|
+| Pantalla de carga | todas | Anillo de progreso 0→100 con el sello C21 al centro. Completa en ~1,2 s la primera vez y ~0,5 s al navegar entre páginas (se recuerda con `sessionStorage`). Tope duro de 2,6 s: si una foto tarda, no retiene al usuario. |
+| Transición entre páginas | todas | Fundido al hacer clic en un enlace interno. No intercepta WhatsApp, `mailto:`, `tel:` ni enlaces externos. |
+| Barra de lectura | todas | Línea dorada arriba que avanza con el scroll. |
+| Revelado al scroll | todas | Tarjetas con desplazamiento escalonado; títulos con máscara. Se mide por posición, no con `IntersectionObserver`, para que el contenido no pueda quedar invisible. |
+| Contadores | home | Métricas del hero y estadísticas cuentan desde cero al entrar en pantalla. |
+| Parallax | heros | La foto de fondo se mueve más lento y el texto se desvanece al bajar. |
+| Cinta de marca | home | Banda con el asterisco del BrandBook; se pausa al pasar el mouse. |
+| Destello en botones | todas | Barrido de luz diagonal al hacer hover. |
+| Aparición de fotos | fichas y tarjetas | Las imágenes entran con desenfoque que se disuelve. |
+| Volver arriba | todas | Aparece a partir de 700 px de scroll. |
+
+Todo se desactiva con `prefers-reduced-motion: reduce`.
 
 ---
 
