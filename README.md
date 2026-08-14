@@ -187,6 +187,7 @@ dice; no lo deja adentro mirando pantallas vacías.
 | Revelado al scroll | todas | Tarjetas con desplazamiento escalonado; títulos con máscara. Se mide por posición, no con `IntersectionObserver`, para que el contenido no pueda quedar invisible. |
 | Contadores | home | Métricas del hero y estadísticas cuentan desde cero al entrar en pantalla. |
 | Parallax | heros | La foto de fondo se mueve más lento y el texto se desvanece al bajar. |
+| Viñeta | heros | Los bordes del video/foto quedan más oscuros que el centro, para que la imagen destaque en vez de mezclarse con el resto de la página. |
 | Cinta de marca | home | Banda con el asterisco del BrandBook; se pausa al pasar el mouse. |
 | Destello en botones | todas | Barrido de luz diagonal al hacer hover. |
 | Aparición de fotos | fichas y tarjetas | Las imágenes entran con desenfoque que se disuelve. |
@@ -272,14 +273,17 @@ H.264 pediría 16 MB.
 
 Los `<source>` de `index.html` llevan la ruta en `data-src` y `main.js` la
 promueve a `src` recién cuando corresponde, así el navegador no descarga nada
-antes de tiempo. El video se enciende sólo en pantallas de 900 px o más, con la
-conexión en buen estado y sin ahorro de datos ni `prefers-reduced-motion`.
+antes de tiempo. El video se enciende en cualquier pantalla, celular incluido,
+salvo que la conexión no dé para eso: con ahorro de datos activado o una red
+lenta (2G/3G) queda la foto de portada, para no gastarle el plan de datos a
+quien está en esas condiciones. `prefers-reduced-motion` también lo desactiva.
 
 De fondo va siempre la foto `assets/img/hero-poster-1280.jpg` (o la de 1920 en
-pantallas grandes, vía `srcset`), que es el primer cuadro del video: en el
-celular es lo único que se descarga —129 KB, ningún video— y en escritorio el
+pantallas grandes, vía `srcset`), que es el primer cuadro del video: si la
+conexión no da para el video, es lo único que se descarga —129 KB— y si sí, el
 video entra encima con un fundido cuando arranca. El `<video>` no lleva atributo
-`poster` a propósito: sería un archivo más que el celular baja sin usar nunca.
+`poster` a propósito: sería un archivo más de fondo mientras se decide si hace
+falta.
 
 > **Ojo al reemplazarlo:** `vercel.json` marca `/assets/img|videos/*` como
 > `immutable` por un año. Si cambiás el contenido, cambiá también el nombre del

@@ -755,18 +755,19 @@
   }
 
   /* -------------------------------------------------------- Video del hero */
-  /* Se enciende sólo cuando conviene: en el celular pesa datos y compite con
-     la carga de la página, así que ahí queda la foto de portada. */
+  /* Se enciende en cualquier pantalla, celular incluido, salvo que la
+     conexión no dé para eso: con ahorro de datos activado o una red
+     lenta (2G/3G) queda la foto de portada, para no gastarle el plan de
+     datos a quien está en esas condiciones. */
   function initHeroVideo() {
     const video = $('[data-hero-video]');
     if (!video) return;
 
     const conexion = navigator.connection || {};
-    const anchoOk  = window.innerWidth >= 900;
     const datosOk  = !conexion.saveData;
     const redOk    = !/^(slow-2g|2g|3g)$/.test(conexion.effectiveType || '');
 
-    if (menosMovimiento || !anchoOk || !datosOk || !redOk) return;
+    if (menosMovimiento || !datosOk || !redOk) return;
 
     let encendido = false;
     const arrancar = () => {

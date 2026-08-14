@@ -170,6 +170,13 @@ h1, h2, h3, h4 { line-height: 1.12; letter-spacing: -.02em; color: var(--tinta);
 .hero { position: relative; min-height: min(92vh, 860px); display: flex; align-items: center; padding-top: var(--header-h); overflow: hidden; }
 .hero__fondo { position: absolute; inset: 0; z-index: -2; }
 .hero__fondo img { width: 100%; height: 100%; object-fit: cover; }
+/* Viñeta: oscurece el marco del video/foto para que el centro destaque más.
+   Va encima de la foto y del video (::after pinta después de ambos), y debajo
+   del degradé de legibilidad del texto (.hero::after, z-index -1). */
+.hero__fondo::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(125% 92% at 50% 46%, transparent 40%, rgba(10,10,11,.62) 100%);
+}
 /* Video de fondo: entra por encima de la foto una vez que arrancó a reproducirse,
    así nunca se ve un rectángulo negro mientras carga. */
 .hero__video {
