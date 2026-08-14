@@ -10,7 +10,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kevin Amoroso — Compra y venta de casas en Venado Tuerto">
 <meta property="og:description" content="Casas, dúplex y departamentos en venta en Venado Tuerto. Tasación sin cargo. CENTURY 21 Domox SA.">
-<meta property="og:image" content="assets/img/hero.jpg">
+<meta property="og:image" content="assets/img/hero-video-poster.jpg">
 <meta property="og:locale" content="es_AR">
 <link rel="icon" href="assets/img/isotipo.svg" type="image/svg+xml">
 <link rel="preload" href="assets/fonts/Aileron-Regular.woff" as="font" type="font/woff" crossorigin>
@@ -21,6 +21,7 @@
 <!-- La pantalla de carga se inyecta antes que nada para evitar el destello de contenido -->
 <script src="assets/js/preloader.js"></script>
 <!-- Registro de metricas: visitas, clics de WhatsApp y consultas -->
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/analytics.js"></script>
 
 <a class="oculto-visual" href="#principal">Ir al contenido principal</a>
@@ -64,7 +65,12 @@
 <!-- ================================================================== HERO -->
 <section class="hero">
   <div class="hero__fondo">
-    <img src="assets/img/hero.jpg" alt="Casa moderna en venta en Venado Tuerto" fetchpriority="high" width="2200" height="1467">
+    <img src="assets/img/hero-video-poster.jpg" alt="Vista aérea de la plaza San Martín, Venado Tuerto" fetchpriority="high" width="1280" height="720">
+    <!-- El video lo enciende main.js: sólo en pantallas grandes, sin ahorro de
+         datos y si el visitante no pidió menos movimiento. -->
+    <video class="hero__video" data-hero-video muted loop playsinline preload="none"
+           poster="assets/img/hero-video-poster.jpg" aria-hidden="true" tabindex="-1"
+           data-src="assets/videos/hero-720.mp4"></video>
   </div>
   <div class="contenedor hero__inner">
     <div class="hero__contenido">

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panel de métricas — Kevin Amoroso | CENTURY 21 Domox</title>
+<title>Panel — Kevin Amoroso | CENTURY 21 Domox</title>
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#3F3F40">
 <link rel="icon" href="assets/img/isotipo.svg" type="image/svg+xml">
@@ -13,7 +13,7 @@
 <body class="admin">
 
 <!-- ================================================================ ACCESO -->
-<div class="acceso" id="acceso">
+<div class="acceso" id="acceso" hidden>
   <div class="acceso__caja">
     <div class="acceso__marca">
       <svg class="marca__sello" viewBox="0 0 100 100" aria-hidden="true">
@@ -21,29 +21,28 @@
         <text x="53" y="66" font-size="50" font-weight="700" fill="currentColor" text-anchor="middle">21</text>
       </svg>
       <div>
-        <h1>Panel de métricas</h1>
+        <h1>Panel de administración</h1>
         <p>Kevin Amoroso · CENTURY 21 Domox SA</p>
       </div>
     </div>
 
-    <form id="form-acceso" autocomplete="off">
+    <form id="form-acceso" autocomplete="on">
       <div class="campo">
-        <label for="usuario">Usuario</label>
-        <input id="usuario" name="usuario" type="text" required autocomplete="username">
+        <label for="usuario">Email</label>
+        <input id="usuario" name="email" type="email" required autocomplete="username" placeholder="tu@email.com">
       </div>
       <div class="campo">
         <label for="clave">Contraseña</label>
-        <input id="clave" name="clave" type="password" required autocomplete="current-password">
+        <input id="clave" name="password" type="password" required autocomplete="current-password">
       </div>
       <p class="acceso__error" id="acceso-error" hidden></p>
-      <button class="btn btn--bloque btn--grande" type="submit">Entrar</button>
+      <button class="btn btn--bloque btn--grande" type="submit" id="btn-entrar">Entrar</button>
     </form>
 
     <p class="acceso__nota">
-      <strong>Acceso provisorio.</strong> La verificación ocurre en el navegador, así que
-      sirve para que el panel no quede a la vista de cualquiera, pero no es una barrera
-      de seguridad real: quien mire el código de la página puede saltearla. Cuando
-      conectemos Supabase se reemplaza por autenticación de verdad.
+      El acceso lo maneja Supabase Auth. El usuario se crea una sola vez desde
+      <strong>Supabase → Authentication → Users</strong>. Si perdés la contraseña,
+      se restablece desde ahí.
     </p>
   </div>
 </div>
@@ -59,18 +58,16 @@
       </svg>
       <div class="panel__titulo">
         <span>CENTURY 21 Domox SA</span>
-        Panel de métricas
+        Panel de administración
       </div>
 
+      <nav class="panel__tabs" aria-label="Secciones del panel">
+        <button type="button" class="panel__tab activo" data-vista="propiedades">Propiedades</button>
+        <button type="button" class="panel__tab" data-vista="metricas">Métricas</button>
+      </nav>
+
       <div class="panel__acciones">
-        <select id="rango" aria-label="Período">
-          <option value="7">Últimos 7 días</option>
-          <option value="30" selected>Últimos 30 días</option>
-          <option value="90">Últimos 90 días</option>
-          <option value="0">Todo el histórico</option>
-        </select>
-        <button class="btn btn--linea" type="button" id="btn-refrescar">Refrescar</button>
-        <button class="btn btn--linea" type="button" id="btn-csv">Exportar CSV</button>
+        <span class="panel__usuario" id="panel-usuario"></span>
         <button class="btn btn--oscuro" type="button" id="btn-salir">Salir</button>
       </div>
     </div>
@@ -80,45 +77,262 @@
 
     <div id="aviso-modo"></div>
 
-    <div class="panel__seccion" style="margin-top:26px">
-      <h2>Resumen del período</h2>
-      <div class="kpis" id="kpis"></div>
-    </div>
+    <!-- ========================================================= PROPIEDADES -->
+    <section class="vista" data-vista-panel="propiedades">
 
-    <div class="panel__seccion">
-      <h2>Visitas por día</h2>
-      <div class="grafico"><div id="grafico"></div></div>
-    </div>
+      <div class="panel__seccion">
+        <div class="barra-herramientas">
+          <div class="barra-herramientas__filtros">
+            <input type="search" id="buscar-prop" placeholder="Buscar por título, referencia o dirección" aria-label="Buscar propiedades">
+            <select id="filtro-estado" aria-label="Filtrar por estado">
+              <option value="">Todos los estados</option>
+              <option value="disponible">Disponibles</option>
+              <option value="reservada">Reservadas</option>
+              <option value="vendida">Vendidas</option>
+              <option value="borrador">Borradores</option>
+            </select>
+          </div>
+          <div class="barra-herramientas__acciones">
+            <button class="btn btn--linea" type="button" id="btn-recargar-prop">Actualizar</button>
+            <button class="btn" type="button" id="btn-nueva">+ Nueva propiedad</button>
+          </div>
+        </div>
 
-    <div class="panel__seccion">
-      <h2>Propiedades más vistas</h2>
-      <div class="tabla-caja" id="tabla-propiedades"></div>
-    </div>
+        <div class="resumen-catalogo" id="resumen-catalogo"></div>
+        <div class="tabla-caja" id="tabla-propiedades-abm"></div>
+      </div>
 
-    <div class="panel__seccion">
-      <h2>Páginas más visitadas</h2>
-      <div class="tabla-caja" id="tabla-paginas"></div>
-    </div>
+    </section>
 
-    <div class="panel__seccion">
-      <h2>De dónde llegan</h2>
-      <div class="tabla-caja" id="tabla-origen"></div>
-    </div>
+    <!-- ============================================================ MÉTRICAS -->
+    <section class="vista" data-vista-panel="metricas" hidden>
 
-    <div class="panel__seccion">
-      <h2>Últimos movimientos</h2>
-      <div class="tabla-caja" id="tabla-eventos"></div>
-    </div>
+      <div class="panel__seccion">
+        <div class="barra-herramientas">
+          <div class="barra-herramientas__filtros">
+            <select id="rango" aria-label="Período">
+              <option value="7">Últimos 7 días</option>
+              <option value="30" selected>Últimos 30 días</option>
+              <option value="90">Últimos 90 días</option>
+              <option value="0">Todo el histórico</option>
+            </select>
+          </div>
+          <div class="barra-herramientas__acciones">
+            <button class="btn btn--linea" type="button" id="btn-refrescar">Refrescar</button>
+            <button class="btn btn--linea" type="button" id="btn-csv">Exportar CSV</button>
+          </div>
+        </div>
+      </div>
 
-    <div class="panel__pie">
-      <span id="pie-info">—</span>
-      <button class="btn btn--linea" type="button" id="btn-borrar" style="padding:8px 14px;font-size:11px">Borrar datos locales</button>
-    </div>
+      <div class="panel__seccion">
+        <h2>Resumen del período</h2>
+        <div class="kpis" id="kpis"></div>
+      </div>
+
+      <div class="panel__seccion">
+        <h2>Visitas por día</h2>
+        <div class="grafico"><div id="grafico"></div></div>
+      </div>
+
+      <div class="panel__seccion">
+        <h2>Propiedades más vistas</h2>
+        <div class="tabla-caja" id="tabla-propiedades"></div>
+      </div>
+
+      <div class="panel__seccion">
+        <h2>Páginas más visitadas</h2>
+        <div class="tabla-caja" id="tabla-paginas"></div>
+      </div>
+
+      <div class="panel__seccion">
+        <h2>De dónde llegan</h2>
+        <div class="tabla-caja" id="tabla-origen"></div>
+      </div>
+
+      <div class="panel__seccion">
+        <h2>Últimos movimientos</h2>
+        <div class="tabla-caja" id="tabla-eventos"></div>
+      </div>
+
+      <div class="panel__pie">
+        <span id="pie-info">—</span>
+      </div>
+
+    </section>
 
   </div>
 </div>
 
+<!-- ====================================================== EDITOR DE FICHA -->
+<div class="editor" id="editor" hidden>
+  <div class="editor__fondo" data-cerrar-editor></div>
+
+  <form class="editor__caja" id="form-propiedad" autocomplete="off">
+    <header class="editor__cab">
+      <div>
+        <h2 id="editor-titulo">Nueva propiedad</h2>
+        <p id="editor-ref">—</p>
+      </div>
+      <button class="editor__cerrar" type="button" data-cerrar-editor aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </header>
+
+    <div class="editor__cuerpo">
+
+      <!-- ---------------------------------------------------------- Fotos -->
+      <fieldset class="bloque">
+        <legend>Fotos</legend>
+        <p class="bloque__ayuda">La primera es la portada: es la que se ve en el catálogo y al compartir el link. Arrastrá las miniaturas para reordenarlas.</p>
+
+        <div class="soltar" id="soltar-fotos" tabindex="0" role="button" aria-label="Agregar fotos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 8h3l1.6-2.4h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/>
+            <circle cx="12" cy="13" r="3.4"/>
+          </svg>
+          <strong>Arrastrá las fotos acá o hacé clic para elegirlas</strong>
+          <span>JPG, PNG o WebP. Se achican solas antes de subirse.</span>
+          <input type="file" id="input-fotos" accept="image/*" multiple hidden>
+        </div>
+
+        <div class="fotos" id="fotos"></div>
+      </fieldset>
+
+      <!-- ------------------------------------------------- Datos generales -->
+      <fieldset class="bloque">
+        <legend>Datos principales</legend>
+        <div class="rejilla">
+          <div class="campo campo--ancho">
+            <label for="f-titulo">Título de la publicación *</label>
+            <input id="f-titulo" type="text" required maxlength="140" placeholder="Casa de 3 dormitorios en Barrio Norte">
+          </div>
+
+          <div class="campo">
+            <label for="f-tipo">Tipo *</label>
+            <select id="f-tipo" required></select>
+          </div>
+
+          <div class="campo">
+            <label for="f-zona">Zona / barrio *</label>
+            <select id="f-zona" required></select>
+          </div>
+
+          <div class="campo">
+            <label for="f-estado">Estado *</label>
+            <select id="f-estado" required>
+              <option value="disponible">Disponible</option>
+              <option value="reservada">Reservada</option>
+              <option value="vendida">Vendida</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="f-direccion">Dirección</label>
+            <input id="f-direccion" type="text" maxlength="140" placeholder="Belgrano al 1200">
+          </div>
+
+          <div class="campo">
+            <label for="f-precio">Precio *</label>
+            <input id="f-precio" type="number" min="0" step="1000" required placeholder="150000">
+          </div>
+
+          <div class="campo">
+            <label for="f-moneda">Moneda</label>
+            <select id="f-moneda">
+              <option value="USD">Dólares (U$D)</option>
+              <option value="ARS">Pesos ($)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="interruptores">
+          <label class="interruptor">
+            <input type="checkbox" id="f-publicada" checked>
+            <span><strong>Publicada</strong>Visible en el sitio. Destildala para dejarla como borrador.</span>
+          </label>
+          <label class="interruptor">
+            <input type="checkbox" id="f-destacada">
+            <span><strong>Destacada</strong>Aparece en la portada, entre las seleccionadas.</span>
+          </label>
+          <label class="interruptor">
+            <input type="checkbox" id="f-nueva">
+            <span><strong>A estrenar</strong>Le pone la etiqueta en la tarjeta.</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <!-- ------------------------------------------------------ Ambientes -->
+      <fieldset class="bloque">
+        <legend>Ambientes y superficies</legend>
+        <div class="rejilla rejilla--compacta">
+          <div class="campo">
+            <label for="f-dormitorios">Dormitorios</label>
+            <input id="f-dormitorios" type="number" min="0" max="30" value="0">
+          </div>
+          <div class="campo">
+            <label for="f-banos">Baños</label>
+            <input id="f-banos" type="number" min="0" max="30" value="0">
+          </div>
+          <div class="campo">
+            <label for="f-cocheras">Cocheras</label>
+            <input id="f-cocheras" type="number" min="0" max="30" value="0">
+          </div>
+          <div class="campo">
+            <label for="f-m2">Cubierta (m²)</label>
+            <input id="f-m2" type="number" min="0" value="0">
+          </div>
+          <div class="campo">
+            <label for="f-m2t">Terreno (m²)</label>
+            <input id="f-m2t" type="number" min="0" value="0">
+          </div>
+          <div class="campo">
+            <label for="f-antiguedad">Antigüedad (años)</label>
+            <input id="f-antiguedad" type="number" min="0" max="200" value="0">
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- --------------------------------------------------------- Textos -->
+      <fieldset class="bloque">
+        <legend>Textos</legend>
+        <div class="campo">
+          <label for="f-resumen">Resumen <small>Una línea: es lo que se lee en la tarjeta y en Google.</small></label>
+          <input id="f-resumen" type="text" maxlength="200" placeholder="Casa en dos plantas con patio y quincho, a tres cuadras del centro.">
+        </div>
+        <div class="campo">
+          <label for="f-descripcion">Descripción <small>Dejá un renglón en blanco entre párrafos.</small></label>
+          <textarea id="f-descripcion" rows="7" placeholder="Primer párrafo.&#10;&#10;Segundo párrafo."></textarea>
+        </div>
+        <div class="rejilla">
+          <div class="campo">
+            <label for="f-amenities">Características <small>Separadas por coma.</small></label>
+            <input id="f-amenities" type="text" placeholder="Pileta, Quincho, Parrilla">
+          </div>
+          <div class="campo">
+            <label for="f-servicios">Servicios <small>Separados por coma.</small></label>
+            <input id="f-servicios" type="text" placeholder="Agua corriente, Gas natural, Cloacas">
+          </div>
+        </div>
+      </fieldset>
+
+    </div>
+
+    <footer class="editor__pie">
+      <p class="editor__error" id="editor-error" hidden></p>
+      <div class="editor__pie-acciones">
+        <button class="btn btn--linea btn--peligro" type="button" id="btn-borrar-prop" hidden>Eliminar</button>
+        <button class="btn btn--linea" type="button" data-cerrar-editor>Cancelar</button>
+        <button class="btn" type="submit" id="btn-guardar">Guardar</button>
+      </div>
+    </footer>
+  </form>
+</div>
+
+<div class="aviso-flotante" id="aviso-flotante" hidden></div>
+
+<script src="assets/js/supabase.js"></script>
 <script src="assets/js/analytics.js"></script>
+<script src="assets/js/data.js"></script>
 <script src="assets/js/admin.js"></script>
 </body>
 </html>

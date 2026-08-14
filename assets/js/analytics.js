@@ -10,19 +10,15 @@
      'supabase' → tabla `eventos` en Supabase. Es el modo real: todos los
                   visitantes escriben en la misma base y el panel ve el total.
 
-   Para pasar a Supabase alcanza con completar las tres líneas de CONFIG_METRICAS
-   (ver supabase/schema.sql para crear la tabla).
+   La conexión sale de assets/js/supabase.js (KA_SB). Si ese archivo no está
+   cargado, se cae solo al modo local y el sitio sigue funcionando.
    ========================================================================== */
 (function (global) {
   'use strict';
 
   /* ------------------------------------------------------------- Config */
   const CONFIG_METRICAS = {
-    // Cambiar a 'supabase' cuando la base esté creada.
-    adaptador: 'local',
-    // PENDIENTE: pegar acá los datos del proyecto de Supabase.
-    supabaseUrl: '',
-    supabaseAnonKey: '',
+    adaptador: 'supabase',
     tabla: 'eventos',
     // Tope de eventos guardados en el navegador (sólo aplica al modo 'local').
     maximoLocal: 4000
@@ -104,41 +100,38 @@
 
   const adaptadorSupabase = {
     nombre: 'supabase',
-    _url(sufijo) {
-      return CONFIG_METRICAS.supabaseUrl.replace(/\/$/, '') +
-             '/rest/v1/' + CONFIG_METRICAS.tabla + (sufijo || '');
-    },
-    _cabeceras(extra) {
-      return Object.assign({
-        'apikey': CONFIG_METRICAS.supabaseAnonKey,
-        'Authorization': 'Bearer ' + CONFIG_METRICAS.supabaseAnonKey,
-        'Content-Type': 'application/json'
-      }, extra || {});
-    },
+
+    /* Escribe con la anon key: el RLS permite insertar y nada más.
+       keepalive hace que el pedido sobreviva a la navegación del clic. */
     async escribir(evento) {
-      // keepalive permite que el pedido sobreviva a la navegación del clic.
-      await fetch(this._url(), {
+      const url = KA_SB.config.url + '/rest/v1/' + CONFIG_METRICAS.tabla;
+      await fetch(url, {
         method: 'POST',
-        headers: this._cabeceras({ 'Prefer': 'return=minimal' }),
+        headers: KA_SB.cabeceras({
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        }),
         body: JSON.stringify(evento),
         keepalive: true
       });
     },
+
+    /* Lee con la sesión del panel: sin usuario autenticado, la base no
+       devuelve nada (por diseño). */
     async leer(desde) {
       const q = '?select=*&order=creado_en.desc&limit=5000' +
                 (desde ? '&creado_en=gte.' + encodeURIComponent(desde) : '');
-      const r = await fetch(this._url(q), { headers: this._cabeceras() });
-      if (!r.ok) throw new Error('Supabase respondió ' + r.status + ' ' + r.statusText);
-      return r.json();
+      return KA_SB.tabla.leer(CONFIG_METRICAS.tabla, q);
     },
+
     async borrar() {
-      throw new Error('El borrado en Supabase se hace desde el panel de Supabase.');
+      throw new Error('Los eventos se borran desde el panel de Supabase.');
     }
   };
 
   function adaptador() {
     const usarSupabase = CONFIG_METRICAS.adaptador === 'supabase' &&
-                         CONFIG_METRICAS.supabaseUrl && CONFIG_METRICAS.supabaseAnonKey;
+                         typeof KA_SB !== 'undefined';
     return usarSupabase ? adaptadorSupabase : adaptadorLocal;
   }
 
@@ -147,10 +140,6 @@
     config: CONFIG_METRICAS,
 
     get modo() { return adaptador().nombre; },
-    /* true cuando se pidió Supabase pero faltan las credenciales */
-    get supabasePendiente() {
-      return CONFIG_METRICAS.adaptador === 'supabase' && adaptador().nombre === 'local';
-    },
 
     registrar(tipo, datos) {
       const evento = Object.assign({

@@ -3,4 +3,10 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-.vercel
+# Credenciales de Supabase — nunca se suben al repositorio
+.env
+
+# Material original pesado: al sitio va la versión comprimida (hero-720.mp4)
+assets/videos/hero.MP4
+assets/videos/*.MOV
+assets/videos/originales/

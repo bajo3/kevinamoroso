@@ -70,37 +70,90 @@ const nombreZona = id => (ZONAS.find(z => z.id === id) || {}).nombre || id;
 
 /* --------------------------------------------------------------------------
    PROPIEDADES
+
+   El catálogo vive en Supabase y se carga al abrir cada página. Las
+   publicaciones se dan de alta desde el panel /admin, no editando este
+   archivo.
+
    operacion: 'venta' | 'compra-directa'
    estado:    'disponible' | 'reservada' | 'vendida'
    -------------------------------------------------------------------------- */
-const PROPIEDADES = [
-  /* ------------------------------------------------------------------------
-     Catálogo vacío: las publicaciones se cargan desde Supabase (ver
-     supabase/schema.sql). Mientras tanto podés sumar propiedades a mano
-     copiando la plantilla de abajo y descomentándola.
+
+/* Respaldo: si Supabase no responde (o todavía no se corrió el esquema), el
+   sitio usa lo que haya en esta lista. Sirve para publicar algo a mano en una
+   emergencia; lo normal es dejarla vacía.
 
   {
-    id: 'KA-1001',                       // referencia única visible en la ficha
+    id: 'KA-1001',
     titulo: 'Casa de 3 dormitorios en Barrio Norte',
-    tipo: 'casa',                        // casa|duplex|ph|depto|quinta|terreno|local|campo
-    zona: 'norte',                       // id de ZONAS
-    operacion: 'venta',
-    estado: 'disponible',                // disponible|reservada|vendida
+    tipo: 'casa', zona: 'norte', operacion: 'venta', estado: 'disponible',
     precio: 150000, moneda: 'USD',
     dormitorios: 3, banos: 2, cocheras: 1,
     m2: 160, m2Terreno: 300, antiguedad: 5,
     direccion: 'Belgrano al 1200',
-    destacada: true,                     // la muestra en la portada
-    nueva: false,                        // etiqueta "A estrenar"
+    destacada: true, nueva: false,
     imagenes: ['p01', 'p02'],            // archivos de assets/img/propiedades/
     resumen: 'Una línea para las tarjetas y el meta description.',
     descripcion: ['Primer párrafo.', 'Segundo párrafo.'],
-    amenities: ['Pileta', 'Quincho'],
-    servicios: ['Agua corriente', 'Gas natural']
+    amenities: ['Pileta'], servicios: ['Gas natural']
   }
+*/
+const PROPIEDADES_RESPALDO = [];
 
-     ------------------------------------------------------------------------ */
-];
+/* La llena cargarPropiedades(). main.js la lee después de esa promesa. */
+let PROPIEDADES = [];
+
+/* Fila de la tabla `propiedades` → objeto que usa el sitio */
+function mapearPropiedad(f) {
+  const lista = v => Array.isArray(v) ? v.filter(x => x != null && x !== '') : [];
+  return {
+    id: f.id,
+    titulo: f.titulo || '',
+    tipo: f.tipo || 'casa',
+    zona: f.zona || '',
+    operacion: f.operacion || 'venta',
+    estado: f.estado || 'disponible',
+    precio: Number(f.precio) || 0,
+    moneda: f.moneda || 'USD',
+    dormitorios: Number(f.dormitorios) || 0,
+    banos: Number(f.banos) || 0,
+    cocheras: Number(f.cocheras) || 0,
+    m2: Number(f.m2) || 0,
+    m2Terreno: Number(f.m2_terreno) || 0,
+    antiguedad: Number(f.antiguedad) || 0,
+    direccion: f.direccion || '',
+    destacada: !!f.destacada,
+    nueva: !!f.nueva,
+    orden: Number(f.orden) || 0,
+    resumen: f.resumen || '',
+    descripcion: lista(f.descripcion),
+    amenities: lista(f.amenities),
+    servicios: lista(f.servicios),
+    imagenes: lista(f.imagenes)
+  };
+}
+
+/* Trae el catálogo publicado. Nunca rechaza: si algo falla, el sitio sigue
+   funcionando con el respaldo y avisa por consola. */
+function cargarPropiedades() {
+  if (typeof KA_SB === 'undefined') {
+    PROPIEDADES = PROPIEDADES_RESPALDO.slice();
+    return Promise.resolve(PROPIEDADES);
+  }
+  return KA_SB.tabla
+    .leerPublico('propiedades',
+      '?select=*&publicada=eq.true&order=destacada.desc,orden.asc,creado_en.desc')
+    .then(filas => {
+      PROPIEDADES = (filas || []).map(mapearPropiedad);
+      if (!PROPIEDADES.length) PROPIEDADES = PROPIEDADES_RESPALDO.slice();
+      return PROPIEDADES;
+    })
+    .catch(e => {
+      console.warn('[catálogo] no se pudo leer Supabase:', e.message);
+      PROPIEDADES = PROPIEDADES_RESPALDO.slice();
+      return PROPIEDADES;
+    });
+}
 
 /* --------------------------------------------------------------------------
    TESTIMONIOS

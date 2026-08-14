@@ -51,7 +51,17 @@
   const fmtPrecio = p =>
     (p.moneda === 'USD' ? 'U$D ' : '$ ') + p.precio.toLocaleString('es-AR');
 
-  const imgSrc = n => `assets/img/propiedades/${n}.jpg`;
+  /* Acepta tanto una URL completa de Supabase Storage como el nombre de un
+     archivo de assets/img/propiedades/. Sin foto, devuelve el marcador. */
+  const SIN_FOTO = 'assets/img/sin-foto.svg';
+  const imgSrc = n => {
+    if (!n) return SIN_FOTO;
+    const s = String(n);
+    return (/^(https?:)?\/\//.test(s) || s.indexOf('assets/') === 0 || s.indexOf('data:') === 0)
+      ? s
+      : `assets/img/propiedades/${s}.jpg`;
+  };
+  const fotos = p => (p.imagenes && p.imagenes.length) ? p.imagenes : [null];
 
   const superficie = p => p.m2 > 0 ? p.m2 : p.m2Terreno;
 
@@ -91,7 +101,7 @@
       <article class="propiedad reveal">
         <div class="propiedad__media">
           <a href="${urlPropiedad(p.id)}" aria-label="Ver ${esc(p.titulo)}">
-            <img src="${imgSrc(p.imagenes[0])}" alt="${esc(p.titulo)}" loading="lazy" width="1400" height="1050">
+            <img src="${imgSrc(fotos(p)[0])}" alt="${esc(p.titulo)}" loading="lazy" width="1400" height="1050">
           </a>
           <div class="propiedad__etiquetas">${etiquetas.join('')}</div>
           <button class="propiedad__fav" type="button" data-fav="${esc(p.id)}"
@@ -639,7 +649,7 @@
 
     // Galería
     const gal = $('[data-galeria]');
-    const imgs = p.imagenes;
+    const imgs = fotos(p);
     gal.innerHTML = `
       <div class="galeria__principal"><img src="${imgSrc(imgs[0])}" alt="${esc(p.titulo)}" data-lb="0" width="1400" height="1050"></div>
       <div class="galeria__lado">
@@ -676,9 +686,17 @@
     $('[data-ficha]').innerHTML = ficha.map(([k, v]) =>
       `<div><strong>${esc(k)}</strong><span>${esc(v)}</span></div>`).join('');
 
-    $('[data-descripcion]').innerHTML = p.descripcion.map(t => `<p>${esc(t)}</p>`).join('');
+    const parrafos = p.descripcion.length ? p.descripcion : (p.resumen ? [p.resumen] : []);
+    $('[data-descripcion]').innerHTML = parrafos.map(t => `<p>${esc(t)}</p>`).join('');
     $('[data-amenities]').innerHTML = p.amenities.map(a => `<li>${ICO.check}${esc(a)}</li>`).join('');
     $('[data-servicios]').innerHTML = p.servicios.map(a => `<li>${ICO.check}${esc(a)}</li>`).join('');
+
+    // Los bloques sin contenido se ocultan en vez de quedar como títulos huérfanos
+    [['[data-descripcion]', parrafos], ['[data-amenities]', p.amenities], ['[data-servicios]', p.servicios]]
+      .forEach(([sel, datos]) => {
+        const bloque = $(sel).closest('.detalle__bloque');
+        if (bloque && !datos.length) bloque.hidden = true;
+      });
 
     // Mapa
     const mapa = $('[data-mapa]');
@@ -736,8 +754,43 @@
     });
   }
 
+  /* -------------------------------------------------------- Video del hero */
+  /* Se enciende sólo cuando conviene: en el celular pesa datos y compite con
+     la carga de la página, así que ahí queda la foto de portada. */
+  function initHeroVideo() {
+    const video = $('[data-hero-video]');
+    if (!video) return;
+
+    const conexion = navigator.connection || {};
+    const anchoOk  = window.innerWidth >= 900;
+    const datosOk  = !conexion.saveData;
+    const redOk    = !/^(slow-2g|2g|3g)$/.test(conexion.effectiveType || '');
+
+    if (menosMovimiento || !anchoOk || !datosOk || !redOk) return;
+
+    let encendido = false;
+    const arrancar = () => {
+      if (encendido) return;   // alEstarListo puede llamar dos veces (evento + red de seguridad)
+      encendido = true;
+      video.src = video.dataset.src;
+      video.load();
+      const reproducir = video.play();
+      if (reproducir && reproducir.catch) reproducir.catch(() => {});
+      video.addEventListener('playing', () => video.classList.add('visible'), { once: true });
+    };
+
+    // Espera a que se haya ido la pantalla de carga para no competir por ancho de banda
+    alEstarListo(() => setTimeout(arrancar, 200));
+  }
+
   /* ============================================================== Arranque */
-  document.addEventListener('DOMContentLoaded', function () {
+  async function arrancarSitio() {
+    // El catálogo vive en Supabase: se espera antes de dibujar para que las
+    // secciones que dependen de él no parpadeen en vacío.
+    if (typeof cargarPropiedades === 'function') {
+      try { await cargarPropiedades(); } catch (e) {}
+    }
+
     // Marca el documento cuando todavía no hay publicaciones cargadas, para que
     // las secciones que dependen del catálogo se oculten en vez de mostrar ceros.
     document.documentElement.classList.toggle('sin-propiedades', !PROPIEDADES.length);
@@ -757,11 +810,16 @@
     initSubir();
     initParallax();
     initFadeImagenes();
+    initHeroVideo();
 
     // Animaciones de entrada: recién cuando se fue la pantalla de carga
     alEstarListo(function () {
       initReveal();
       initContadores();
     });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    arrancarSitio().catch(e => console.error('[sitio] error al arrancar:', e));
   });
 })();

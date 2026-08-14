@@ -5,7 +5,8 @@ enfocado en **compra y venta de casas**, tomando como referencia estructural
 [vanzini.com.ar](https://www.vanzini.com.ar/) y aplicando la identidad visual del
 BrandBook *Identidad Visual Redes* de CENTURY 21 Domox SA.
 
-HTML, CSS y JavaScript puros. Sin build, sin dependencias, sin backend.
+HTML, CSS y JavaScript puros: sin build ni dependencias. El catálogo y las
+métricas viven en **Supabase**, y se administran desde `/admin`.
 
 **En línea:** https://kevinamoroso.vercel.app
 **Repositorio:** https://github.com/bajo3/kevinamoroso
@@ -55,27 +56,55 @@ nosotros.html       Perfil de Kevin, misión/visión/valores, respaldo de la red
 contacto.html       Datos de contacto, mapa y formulario
 
 assets/css/styles.css   Sistema visual completo
-assets/js/data.js       ← CONFIGURACIÓN Y PROPIEDADES (editá acá)
+assets/js/data.js       ← DATOS DE CONTACTO, TIPOS Y BARRIOS (editá acá)
 assets/js/main.js       Lógica: filtros, galería, formularios, favoritos
-admin.html          Panel de métricas (también accesible en /admin)
+admin.html          Panel de administración (también accesible en /admin)
 
+assets/js/supabase.js   ← CONEXIÓN CON SUPABASE (URL, anon key, auth, storage)
 assets/js/preloader.js  Pantalla de carga + transición entre páginas
-assets/js/analytics.js  ← REGISTRO DE MÉTRICAS (acá van las claves de Supabase)
-assets/js/admin.js      Lógica del panel
+assets/js/analytics.js  Registro de métricas
+assets/js/admin.js      Lógica del panel: catálogo + métricas
 assets/css/admin.css    Estilos del panel
 assets/fonts/           Aileron (.woff)
-assets/img/             Hero, retrato, zonas y fotos de propiedades
-supabase/schema.sql     Tablas, políticas y vistas listas para ejecutar
+assets/img/             Hero, retrato, zonas y marcador sin-foto
+assets/videos/          hero-720.mp4 (loop del hero, ya comprimido)
+supabase/schema.sql     Tablas, políticas, vistas y bucket listos para ejecutar
 vercel.json             Ruta /admin, cabeceras de caché y seguridad
 ```
 
+Las **fotos de las propiedades ya no viven en el repositorio**: se suben desde
+el panel y quedan en Supabase Storage.
+
 ---
 
-## Panel de métricas — `/admin`
+## Panel de administración — `/admin`
 
-https://kevinamoroso.vercel.app/admin · usuario **admin** · contraseña **admin**
+https://kevinamoroso.vercel.app/admin · se entra con **email y contraseña de
+Supabase Auth** (no hay usuario "admin" hardcodeado).
 
-Muestra, para el período elegido (7 / 30 / 90 días o todo):
+Tiene dos secciones.
+
+### Propiedades
+
+Es el lugar donde se carga y se mantiene el catálogo. No hace falta tocar
+ningún archivo para publicar una casa.
+
+- Listado con foto, referencia, zona, precio, estado y cantidad de fotos
+- Búsqueda por título / referencia / dirección y filtro por estado
+- **Publicar / despublicar** con un clic (una publicación despublicada queda
+  como borrador: se guarda pero no se ve en el sitio)
+- Alta y edición en un panel lateral con todos los campos de la ficha
+- Fotos: se arrastran a la caja o se eligen del disco. Antes de subirse se
+  achican a 1920 px y se convierten a JPG en el navegador — una foto de celular
+  de 6 MB queda en unos 300 KB — respetando la orientación EXIF para que las
+  verticales no salgan acostadas. Se reordenan arrastrando; la primera es la
+  portada
+- Eliminar borra también las fotos del bucket, así no queda basura en Storage
+- La referencia (`KA-1001`, `KA-1002`…) se calcula sola
+
+### Métricas
+
+Para el período elegido (7 / 30 / 90 días o todo):
 
 - Visitantes únicos, visitas de página y vistas de ficha de propiedad
 - Clics en WhatsApp y consultas enviadas por formulario
@@ -86,42 +115,32 @@ Muestra, para el período elegido (7 / 30 / 90 días o todo):
 - Páginas más visitadas y de dónde llega la gente (Google, Instagram, directo…)
 - Últimos 40 movimientos, exportables a CSV
 
-### ⚠️ Dos limitaciones mientras no esté Supabase
+---
 
-1. **El acceso no es seguridad real.** Usuario y contraseña se comparan en el
-   navegador y el código de la página es público, así que sirve para que el panel
-   no quede a la vista, pero alguien decidido puede saltearlo. Se reemplaza por
-   Supabase Auth.
+## Puesta en marcha de Supabase (una sola vez)
 
-2. **Los datos son de un solo navegador.** En modo `local` cada visitante guarda
-   sus eventos en SU equipo, así que el panel sólo muestra la actividad de quien
-   lo abre. Para medir a todos los visitantes hace falta Supabase.
+**1. Crear las tablas.** Supabase → **SQL Editor** → **New query** → pegar todo
+`supabase/schema.sql` → **Run**. Crea `propiedades` y `eventos`, las políticas
+de acceso, las vistas de resumen y el bucket `propiedades` de Storage con sus
+permisos. Se puede volver a ejecutar sin perder datos.
 
-### Cómo conectar Supabase (10 minutos)
+**2. Crear el usuario del panel.** Supabase → **Authentication → Users → Add
+user** → email y contraseña. Ese es el acceso a `/admin`.
 
-1. En Supabase → **SQL Editor** → pegar todo `supabase/schema.sql` → **Run**.
-   Crea las tablas `eventos` y `propiedades`, las políticas de acceso y dos
-   vistas de resumen.
-2. En **Project Settings → API** copiar la *Project URL* y la *anon public key*.
-3. Pegarlas en `assets/js/analytics.js`, en `CONFIG_METRICAS`:
+Listo. La URL del proyecto y la *anon key* ya están en
+`assets/js/supabase.js`; no hay nada más que completar.
 
-   ```js
-   adaptador: 'supabase',
-   supabaseUrl: 'https://xxxxxxxx.supabase.co',
-   supabaseAnonKey: 'eyJhbGciOi...'
-   ```
+### Cómo quedan los permisos
 
-4. `git push` — Vercel publica solo.
+| Quién | Propiedades | Eventos | Fotos |
+|---|---|---|---|
+| Visitante del sitio (anon key) | lee sólo las publicadas | sólo inserta | sólo ve |
+| Panel (usuario autenticado) | lee y escribe todo | lee todo | sube y borra |
 
-La tabla `eventos` queda con RLS: el sitio público **sólo puede insertar**, no
-leer. Por eso, para que el panel lea los datos hace falta el paso siguiente:
-activar Supabase Auth y crear el usuario de Kevin. Ese es el cambio que reemplaza
-al `admin/admin` provisorio.
-
-### Storage de fotos
-
-En Supabase → **Storage** → crear un bucket público llamado `propiedades`.
-Las URLs completas de las fotos se guardan en la columna `imagenes` de la tabla.
+La *anon key* viaja en el JavaScript y es pública por diseño: quien la copie no
+puede leer las métricas ni tocar el catálogo, porque eso lo decide el RLS de la
+base. La `service_role` **nunca** va en el frontend — vive sólo en `.env`, que
+está en `.gitignore`.
 
 ---
 
@@ -169,51 +188,55 @@ Buscá la palabra **`PENDIENTE`**:
 
 ### Estado del catálogo
 
-`PROPIEDADES` está **vacío**: las publicaciones se van a cargar desde Supabase.
-Mientras no haya ninguna, el sitio se adapta solo — se ocultan el buscador, las
+El catálogo se carga desde Supabase con el panel `/admin`. Mientras no haya
+ninguna publicación, el sitio se adapta solo — se ocultan el buscador, las
 estadísticas, las categorías y los barrios, y en su lugar aparece un bloque de
 "Estamos preparando el catálogo" con acceso directo a WhatsApp. Apenas entre la
 primera propiedad, todas esas secciones reaparecen sin tocar nada.
 
 Los `TESTIMONIOS` siguen siendo **contenido de muestra** y hay que reemplazarlos
-por reseñas reales. Las fotos de `assets/img/` son de Unsplash (licencia libre) y
-se usan como fondo de las portadas y de los barrios.
+por reseñas reales. Las fotos de `assets/img/zonas/` son de Unsplash (licencia
+libre) y se usan como fondo de los barrios.
 
 ---
 
-## Cargar una propiedad a mano
+## Cargar una propiedad
 
-Mientras Supabase no esté conectado, se puede sumar una publicación agregando un
-objeto al array `PROPIEDADES` en `assets/js/data.js` (hay una plantilla comentada
-adentro del array):
+Desde **`/admin` → Propiedades → + Nueva propiedad**. Lo único obligatorio es
+título, tipo, zona, estado y precio: todo lo demás se puede completar después.
 
-```js
-{
-  id: 'KA-1015',                       // referencia única, se muestra en la ficha
-  titulo: 'Casa de 3 dormitorios en Barrio Norte',
-  tipo: 'casa',                        // casa | duplex | ph | depto | quinta | terreno | local | campo
-  zona: 'norte',                       // id de ZONAS
-  operacion: 'venta',
-  estado: 'disponible',                // disponible | reservada | vendida
-  precio: 150000, moneda: 'USD',
-  dormitorios: 3, banos: 2, cocheras: 1,
-  m2: 160, m2Terreno: 300, antiguedad: 5,
-  direccion: 'Belgrano al 1200',
-  destacada: true,                     // aparece en la home
-  nueva: false,                        // muestra la etiqueta "A estrenar"
-  imagenes: ['p01', 'p02', 'p03'],     // archivos de assets/img/propiedades/
-  resumen: 'Una línea para las tarjetas y el meta description.',
-  descripcion: ['Primer párrafo.', 'Segundo párrafo.'],
-  amenities: ['Pileta', 'Quincho'],
-  servicios: ['Agua corriente', 'Gas natural']
-}
+Una publicación sin fotos se guarda igual y muestra un marcador
+(`assets/img/sin-foto.svg`) en vez de una imagen rota, así se puede dejar
+armada y sumarle las fotos cuando estén.
+
+Si por algún motivo Supabase no responde, el sitio usa el array
+`PROPIEDADES_RESPALDO` de `assets/js/data.js` (normalmente vacío). Sirve para
+publicar algo a mano en una emergencia; el formato de cada objeto está
+comentado ahí mismo.
+
+Los barrios (`ZONAS`) y tipos (`TIPOS`) se editan en `assets/js/data.js`, junto
+con `TESTIMONIOS` y `FAQS`. Si agregás un barrio nuevo, aparece solo en el
+selector del panel y en los filtros del sitio.
+
+---
+
+## El video del hero
+
+`assets/videos/hero-720.mp4` es un loop de 24 s (4,2 MB) hecho con el original
+de 201 MB: se recortaron 12 s de la toma aérea de la plaza San Martín y se
+duplicaron en reversa, así el bucle no tiene salto. El original queda fuera del
+repositorio por `.gitignore`.
+
+Se enciende sólo en pantallas de 900 px o más, con la conexión en buen estado y
+sin ahorro de datos ni `prefers-reduced-motion`. En el celular queda la foto
+`assets/img/hero-video-poster.jpg`, que es el primer cuadro del video, de modo
+que no se nota el cambio.
+
+Para reemplazarlo por otra toma:
+
+```bash
+ffmpeg -y -ss 14 -t 12 -i original.mp4 -filter_complex "[0:v]scale=1280:-2,fps=25,setpts=PTS-STARTPTS,split[f][r];[r]reverse,select='gt(n\,0)',setpts=PTS-STARTPTS[rv];[f][rv]concat=n=2:v=1[out]" -map "[out]" -an -c:v libx264 -crf 31 -maxrate 1800k -bufsize 3600k -preset slow -g 50 -movflags +faststart assets/videos/hero-720.mp4
 ```
-
-Para sumar fotos, copialas a `assets/img/propiedades/` y referenciá el nombre
-sin extensión. Se esperan `.jpg`.
-
-Los barrios (`ZONAS`) y tipos (`TIPOS`) también se editan en ese archivo, junto
-con `TESTIMONIOS` y `FAQS`.
 
 ---
 
