@@ -53,6 +53,18 @@
     if (/Could not find the table|PGRST205|does not exist/i.test(m)) {
       return 'Faltan las tablas en Supabase. Pegá el archivo supabase/schema.sql en el SQL Editor y ejecutalo.';
     }
+    if (/SIN_PERMISO/.test(m)) {
+      return 'Ese usuario existe pero no tiene permiso de administrador. Agregalo a la tabla `admins` con el SQL que está al final de supabase/schema.sql.';
+    }
+    if (/Password should be at least|password.*too short|weak.?password/i.test(m)) {
+      return 'Supabase rechazó la contraseña por corta o débil. Probá con una más larga.';
+    }
+    if (/should be different from the old password/i.test(m)) {
+      return 'La contraseña nueva tiene que ser distinta de la actual.';
+    }
+    if (/reauthentication/i.test(m)) {
+      return 'Supabase pide reautenticación para cambiar la contraseña. Desactivá "Secure password change" en Authentication → Providers → Email, o cambiala desde el dashboard.';
+    }
     if (/Invalid login credentials/i.test(m)) return 'Email o contraseña incorrectos.';
     if (/Email not confirmed/i.test(m)) return 'Ese usuario todavía no confirmó el email. Confirmalo desde Supabase → Authentication → Users.';
     if (/JWT expired|invalid claim/i.test(m)) return 'La sesión venció. Volvé a entrar.';
@@ -81,6 +93,17 @@
     cargarCatalogo();
   }
 
+  /* Estar autenticado no alcanza para administrar: el permiso lo decide la
+     tabla `admins` de Supabase (ver supabase/schema.sql). El RLS deja que cada
+     usuario vea únicamente su propia fila, así que si vuelve vacío es que no
+     tiene permiso. Sin este chequeo entraría igual y vería el panel vacío, sin
+     entender por qué. Si las tablas todavía no existen, `leer` tira el error
+     de siempre y lo traduce explicar(). */
+  async function esAdmin() {
+    const filas = await KA_SB.tabla.leer('admins', '?select=usuario_id&limit=1');
+    return Array.isArray(filas) && filas.length > 0;
+  }
+
   $('#form-acceso').addEventListener('submit', async function (ev) {
     ev.preventDefault();
     const err = $('#acceso-error');
@@ -91,6 +114,7 @@
 
     try {
       await KA_SB.auth.ingresar($('#usuario').value.trim(), $('#clave').value);
+      if (!await esAdmin()) { await KA_SB.auth.salir(); throw new Error('SIN_PERMISO'); }
       $('#clave').value = '';
       mostrarPanel();
     } catch (e) {
@@ -107,6 +131,56 @@
   $('#btn-salir').addEventListener('click', async function () {
     await KA_SB.auth.salir();
     location.reload();
+  });
+
+  /* ==================================================================== */
+  /*  Cuenta — cambio de contraseña                                       */
+  /* ==================================================================== */
+  /* Si el navegador sirviera un admin.html viejo de caché, este formulario no
+     existiría y el panel entero se caería acá. Mejor que falte la pestaña. */
+  const formClave = $('#form-clave');
+  if (formClave) formClave.addEventListener('submit', async function (ev) {
+    ev.preventDefault();
+    const err    = $('#clave-error');
+    const btn    = $('#btn-clave');
+    const actual = $('#clave-actual').value;
+    const nueva  = $('#clave-nueva').value;
+    const repeti = $('#clave-repetir').value;
+
+    const fallar = texto => {
+      err.hidden = false;
+      err.textContent = texto;
+    };
+    err.hidden = true;
+
+    if (nueva !== repeti)    return fallar('Las dos contraseñas nuevas no coinciden.');
+    if (nueva.length < 8)    return fallar('La contraseña nueva tiene que tener al menos 8 caracteres.');
+    if (nueva === actual)    return fallar('La contraseña nueva es igual a la actual.');
+
+    btn.disabled = true;
+    btn.textContent = 'Cambiando…';
+    try {
+      // Reconfirma la identidad: sin esto, cualquiera que encuentre la sesión
+      // abierta en una máquina prestada podría dejar a Kevin afuera.
+      const email = (KA_SB.auth.usuario || {}).email;
+      try {
+        await KA_SB.auth.ingresar(email, actual);
+      } catch (e) {
+        throw new Error(/Invalid login credentials/i.test(e.message)
+          ? 'CLAVE_ACTUAL_MAL' : e.message);
+      }
+
+      await KA_SB.auth.cambiarClave(nueva);
+      this.reset();
+      avisar('Contraseña cambiada. Usá la nueva la próxima vez que entres.');
+    } catch (e) {
+      fallar(/CLAVE_ACTUAL_MAL/.test(e.message)
+        ? 'La contraseña actual no es correcta.'
+        : explicar(e));
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Cambiar contraseña';
+    }
   });
 
   /* ==================================================================== */
@@ -875,7 +949,17 @@
   /*  Arranque                                                            */
   /* ==================================================================== */
   (async function iniciar() {
-    if (KA_SB.auth.haySesion() && await KA_SB.auth.token()) mostrarPanel();
-    else mostrarAcceso();
+    if (!(KA_SB.auth.haySesion() && await KA_SB.auth.token())) { mostrarAcceso(); return; }
+    // Una sesión guardada tampoco garantiza el permiso: pudo revocarse
+    // sacando la fila de `admins` mientras la sesión seguía abierta.
+    try {
+      if (await esAdmin()) { mostrarPanel(); return; }
+      await KA_SB.auth.salir();
+      mostrarAcceso();
+      avisar(explicar(new Error('SIN_PERMISO')), 'error');
+    } catch (e) {
+      mostrarAcceso();
+      avisar(explicar(e), 'error');
+    }
   })();
 })();

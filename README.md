@@ -67,7 +67,7 @@ assets/js/admin.js      Lógica del panel: catálogo + métricas
 assets/css/admin.css    Estilos del panel
 assets/fonts/           Aileron (.woff)
 assets/img/             Hero, retrato, zonas y marcador sin-foto
-assets/videos/          hero-720.mp4 (loop del hero, ya comprimido)
+assets/videos/          hero-1080-av1.mp4 + hero-1080-h264.mp4 (loop del hero)
 supabase/schema.sql     Tablas, políticas, vistas y bucket listos para ejecutar
 vercel.json             Ruta /admin, cabeceras de caché y seguridad
 ```
@@ -82,7 +82,7 @@ el panel y quedan en Supabase Storage.
 https://kevinamoroso.vercel.app/admin · se entra con **email y contraseña de
 Supabase Auth** (no hay usuario "admin" hardcodeado).
 
-Tiene dos secciones.
+Tiene tres secciones.
 
 ### Propiedades
 
@@ -115,6 +115,18 @@ Para el período elegido (7 / 30 / 90 días o todo):
 - Páginas más visitadas y de dónde llega la gente (Google, Instagram, directo…)
 - Últimos 40 movimientos, exportables a CSV
 
+### Cuenta
+
+Cambio de contraseña sin pasar por el dashboard de Supabase. Pide la contraseña
+actual antes de aceptar la nueva: si alguien encuentra la sesión abierta en una
+máquina prestada, no puede dejar a Kevin afuera de su propio panel.
+
+Mínimo 8 caracteres. La sesión abierta sigue valiendo después del cambio, así
+que no hace falta volver a entrar.
+
+Esto sirve para *cambiar* la contraseña, no para recuperarla: si te la olvidás y
+no podés entrar, se restablece desde Supabase → Authentication → Users.
+
 ---
 
 ## Puesta en marcha de Supabase (una sola vez)
@@ -125,22 +137,43 @@ de acceso, las vistas de resumen y el bucket `propiedades` de Storage con sus
 permisos. Se puede volver a ejecutar sin perder datos.
 
 **2. Crear el usuario del panel.** Supabase → **Authentication → Users → Add
-user** → email y contraseña. Ese es el acceso a `/admin`.
+user** → email y contraseña.
 
-Listo. La URL del proyecto y la *anon key* ya están en
-`assets/js/supabase.js`; no hay nada más que completar.
+Antes de ejecutar el schema, editá el email que está al final del archivo
+(sección 6, marcado con `EDITAR`): ese usuario queda habilitado como admin
+solo. El orden entre los pasos 1 y 2 no importa — si ejecutás el schema antes
+de crear el usuario, no falla: avisa que todavía no hay admins y basta con
+volver a ejecutarlo después.
+
+Crear el usuario **no alcanza** por sí solo: si no está en la tabla `admins`,
+el panel no lo deja entrar.
+
+**3. Cerrar el registro público.** Supabase → **Authentication → Sign In /
+Providers → Email** → desactivar *"Allow new users to sign up"*. Viene
+habilitado de fábrica y no hay razón para dejar que cualquiera se cree una
+cuenta en el proyecto.
+
+La URL del proyecto y la *anon key* ya están en `assets/js/supabase.js`; no hay
+nada más que completar.
 
 ### Cómo quedan los permisos
 
 | Quién | Propiedades | Eventos | Fotos |
 |---|---|---|---|
 | Visitante del sitio (anon key) | lee sólo las publicadas | sólo inserta | sólo ve |
-| Panel (usuario autenticado) | lee y escribe todo | lee todo | sube y borra |
+| Autenticado que **no** está en `admins` | nada | nada | sólo ve |
+| Panel (usuario en `admins`) | lee y escribe todo | lee todo | sube y borra |
 
-La *anon key* viaja en el JavaScript y es pública por diseño: quien la copie no
-puede leer las métricas ni tocar el catálogo, porque eso lo decide el RLS de la
-base. La `service_role` **nunca** va en el frontend — vive sólo en `.env`, que
-está en `.gitignore`.
+El permiso no se lo da estar autenticado sino estar en `admins`, y eso es a
+propósito. La *anon key* viaja en el JavaScript y es pública por diseño, así que
+si las políticas se apoyaran en `authenticated` a secas, a cualquiera que se
+registrara en el proyecto le quedaría el mismo poder que a Kevin. Quien copie la
+anon key no puede leer las métricas ni tocar el catálogo, porque eso lo decide
+el RLS de la base. La `service_role` **nunca** va en el frontend — vive sólo en
+`.env`, que está en `.gitignore`.
+
+Si un usuario entra al panel sin estar en `admins`, el panel lo saca y se lo
+dice; no lo deja adentro mirando pantallas vacías.
 
 ---
 
@@ -148,8 +181,8 @@ está en `.gitignore`.
 
 | Efecto | Dónde | Detalle |
 |---|---|---|
-| Pantalla de carga | todas | Anillo de progreso 0→100 con el sello C21 al centro. Completa en ~1,2 s la primera vez y ~0,5 s al navegar entre páginas (se recuerda con `sessionStorage`). Tope duro de 2,6 s: si una foto tarda, no retiene al usuario. |
-| Transición entre páginas | todas | Fundido al hacer clic en un enlace interno. No intercepta WhatsApp, `mailto:`, `tel:` ni enlaces externos. |
+| Pantalla de carga | sólo la primera vez | Anillo de progreso 0→100 con el sello C21 al centro. Completa en ~1,2 s (tope duro de 2,6 s: si una foto tarda, no retiene al usuario). Se recuerda con `sessionStorage`, así que al navegar entre páginas de la misma visita no vuelve a aparecer — sólo queda el fundido de abajo. |
+| Transición entre páginas | todas | Fundido al hacer clic en un enlace interno, en todas las páginas, haya habido anillo o no. No intercepta WhatsApp, `mailto:`, `tel:` ni enlaces externos. |
 | Barra de lectura | todas | Línea dorada arriba que avanza con el scroll. |
 | Revelado al scroll | todas | Tarjetas con desplazamiento escalonado; títulos con máscara. Se mide por posición, no con `IntersectionObserver`, para que el contenido no pueda quedar invisible. |
 | Contadores | home | Métricas del hero y estadísticas cuentan desde cero al entrar en pantalla. |
@@ -222,21 +255,50 @@ selector del panel y en los filtros del sitio.
 
 ## El video del hero
 
-`assets/videos/hero-720.mp4` es un loop de 24 s (4,2 MB) hecho con el original
-de 201 MB: se recortaron 12 s de la toma aérea de la plaza San Martín y se
-duplicaron en reversa, así el bucle no tiene salto. El original queda fuera del
-repositorio por `.gitignore`.
+Es un loop de 24 s en 1080p hecho con el original de 201 MB: se recortaron 12 s
+de la toma aérea de la plaza San Martín y se duplicaron en reversa, así el bucle
+no tiene salto. El original queda fuera del repositorio por `.gitignore`.
 
-Se enciende sólo en pantallas de 900 px o más, con la conexión en buen estado y
-sin ahorro de datos ni `prefers-reduced-motion`. En el celular queda la foto
-`assets/img/hero-video-poster.jpg`, que es el primer cuadro del video, de modo
-que no se nota el cambio.
+Va en dos codecs, y el navegador elige el primero que sepa decodificar:
 
-Para reemplazarlo por otra toma:
+| Archivo | Codec | Peso | VMAF |
+|---|---|---|---|
+| `hero-1080-av1.mp4` | AV1 (Main@4.0) | 7,5 MB | 91 |
+| `hero-1080-h264.mp4` | H.264 (High@5.1) | 11,6 MB | 89 |
+
+AV1 lo soportan Chrome, Edge y Firefox; el H.264 cubre a Safari anterior a la 17
+y a los Mac Intel. Para esta toma AV1 rinde ~40 % mejor: la misma calidad en
+H.264 pediría 16 MB.
+
+Los `<source>` de `index.html` llevan la ruta en `data-src` y `main.js` la
+promueve a `src` recién cuando corresponde, así el navegador no descarga nada
+antes de tiempo. El video se enciende sólo en pantallas de 900 px o más, con la
+conexión en buen estado y sin ahorro de datos ni `prefers-reduced-motion`.
+
+De fondo va siempre la foto `assets/img/hero-poster-1280.jpg` (o la de 1920 en
+pantallas grandes, vía `srcset`), que es el primer cuadro del video: en el
+celular es lo único que se descarga —129 KB, ningún video— y en escritorio el
+video entra encima con un fundido cuando arranca. El `<video>` no lleva atributo
+`poster` a propósito: sería un archivo más que el celular baja sin usar nunca.
+
+> **Ojo al reemplazarlo:** `vercel.json` marca `/assets/img|videos/*` como
+> `immutable` por un año. Si cambiás el contenido, cambiá también el nombre del
+> archivo — si no, quien ya visitó el sitio sigue viendo el viejo hasta 12 meses.
+
+Para reemplazarlo por otra toma (ajustá `-ss` y `-t` al tramo que quieras):
 
 ```bash
-ffmpeg -y -ss 14 -t 12 -i original.mp4 -filter_complex "[0:v]scale=1280:-2,fps=25,setpts=PTS-STARTPTS,split[f][r];[r]reverse,select='gt(n\,0)',setpts=PTS-STARTPTS[rv];[f][rv]concat=n=2:v=1[out]" -map "[out]" -an -c:v libx264 -crf 31 -maxrate 1800k -bufsize 3600k -preset slow -g 50 -movflags +faststart assets/videos/hero-720.mp4
+LOOP="[0:v]scale=1920:-2,fps=25,setpts=PTS-STARTPTS,split[f][r];[r]reverse,select='gt(n\,0)',setpts=PTS-STARTPTS[rv];[f][rv]concat=n=2:v=1[out]"
+ffmpeg -y -ss 14 -t 12 -i original.mp4 -filter_complex "$LOOP" -map "[out]" -an -c:v libsvtav1 -crf 50 -preset 4 -g 50 -pix_fmt yuv420p -movflags +faststart assets/videos/hero-1080-av1.mp4
+ffmpeg -y -ss 14 -t 12 -i original.mp4 -filter_complex "$LOOP" -map "[out]" -an -c:v libx264 -crf 30 -preset veryslow -g 50 -pix_fmt yuv420p -movflags +faststart assets/videos/hero-1080-h264.mp4
+ffmpeg -y -ss 14 -i original.mp4 -vf "scale=1920:-2" -frames:v 1 -q:v 6 assets/img/hero-poster-1920.jpg
+ffmpeg -y -ss 14 -i original.mp4 -vf "scale=1280:-2" -frames:v 1 -q:v 5 assets/img/hero-poster-1280.jpg
 ```
+
+Si cambiás el codec o el nivel, actualizá los `codecs="…"` de los `<source>` en
+`index.html`: si declaran algo que no coincide, el navegador puede descartar la
+fuente sin probarla. El valor real sale de
+`ffprobe -show_entries stream=profile,level`.
 
 ---
 

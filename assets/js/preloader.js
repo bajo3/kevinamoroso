@@ -9,14 +9,66 @@
   var html = document.documentElement;
   var reducido = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* Primera visita de la sesión → carga completa. Navegación interna → carga breve. */
+  /* ------------------------------------------- Transición entre páginas */
+  /* El fundido al hacer clic en un enlace interno corre en todas las páginas,
+     haya habido anillo de carga o no. Se arma antes que nada porque el
+     handler de clic tiene que estar activo desde el primer instante. */
+  function iniciarTransicionDeSalida(overlay) {
+    var transicion = document.createElement('div');
+    transicion.className = 'transicion';
+    transicion.setAttribute('aria-hidden', 'true');
+    (document.body || html).appendChild(transicion);
+
+    if (!reducido) {
+      document.addEventListener('click', function (ev) {
+        if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+
+        var a = ev.target.closest && ev.target.closest('a[href]');
+        if (!a) return;
+        if (a.target && a.target !== '_self') return;
+        if (a.hasAttribute('download')) return;
+
+        var href = a.getAttribute('href');
+        if (!href || href.charAt(0) === '#') return;
+        if (/^(mailto:|tel:|https?:\/\/wa\.me|javascript:)/i.test(href)) return;
+        if (a.origin && a.origin !== window.location.origin) return;
+        // Mismo documento, sólo cambia el hash
+        if (a.pathname === window.location.pathname && a.search === window.location.search) return;
+
+        ev.preventDefault();
+        html.classList.add('saliendo');
+        setTimeout(function () { window.location.href = a.href; }, 320);
+      });
+    }
+
+    /* Al volver con el botón "atrás" (bfcache) el overlay debe estar limpio. */
+    window.addEventListener('pageshow', function (ev) {
+      html.classList.remove('saliendo');
+      if (ev.persisted) {
+        html.classList.remove('cargando');
+        if (overlay) overlay.classList.add('oculta');
+      }
+    });
+  }
+
+  /* El anillo con el porcentaje sólo se ve en la primera carga de la sesión.
+     Navegando entre páginas ya está el fundido de salida de arriba — un
+     segundo indicador de carga encima sería ruido, y retrasa sin necesidad
+     la aparición del contenido (hero, video) en cada clic. */
   var primeraVez = true;
   try { primeraVez = !sessionStorage.getItem('ka_precarga'); sessionStorage.setItem('ka_precarga', '1'); } catch (e) {}
 
-  var DURACION_MIN = reducido ? 0 : (primeraVez ? 1200 : 480);
+  if (!primeraVez) {
+    html.classList.add('listo');
+    window.dispatchEvent(new CustomEvent('ka:cargado'));
+    iniciarTransicionDeSalida(null);
+    return;
+  }
+
+  var DURACION_MIN = reducido ? 0 : 1200;
   /* Tope duro: pase lo que pase con las imágenes, la pantalla no retiene al
      usuario más que esto. El resto de las fotos siguen cargando por detrás. */
-  var DURACION_MAX = reducido ? 0 : (primeraVez ? 2600 : 900);
+  var DURACION_MAX = reducido ? 0 : 2600;
   var RADIO = 54;
   var PERIMETRO = 2 * Math.PI * RADIO;   // 339.29
 
@@ -48,13 +100,8 @@
       '<p class="precarga__estado">Cargando<b>.</b><b>.</b><b>.</b></p>' +
     '</div>';
 
-  var transicion = document.createElement('div');
-  transicion.className = 'transicion';
-  transicion.setAttribute('aria-hidden', 'true');
-
   html.classList.add('cargando');
   (document.body || html).appendChild(overlay);
-  (document.body || html).appendChild(transicion);
 
   var arco = overlay.querySelector('.precarga__arco');
   var numero = overlay.querySelector('.precarga__pct b');
@@ -127,32 +174,5 @@
   /* Red de seguridad final por si algo falla en el camino. */
   setTimeout(function () { forzarFinal = true; setTimeout(cerrar, 400); }, 6000);
 
-  /* ------------------------------------------- Transición entre páginas */
-  if (!reducido) {
-    document.addEventListener('click', function (ev) {
-      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
-
-      var a = ev.target.closest && ev.target.closest('a[href]');
-      if (!a) return;
-      if (a.target && a.target !== '_self') return;
-      if (a.hasAttribute('download')) return;
-
-      var href = a.getAttribute('href');
-      if (!href || href.charAt(0) === '#') return;
-      if (/^(mailto:|tel:|https?:\/\/wa\.me|javascript:)/i.test(href)) return;
-      if (a.origin && a.origin !== window.location.origin) return;
-      // Mismo documento, sólo cambia el hash
-      if (a.pathname === window.location.pathname && a.search === window.location.search) return;
-
-      ev.preventDefault();
-      html.classList.add('saliendo');
-      setTimeout(function () { window.location.href = a.href; }, 320);
-    });
-  }
-
-  /* Al volver con el botón "atrás" (bfcache) el overlay debe estar limpio. */
-  window.addEventListener('pageshow', function (ev) {
-    html.classList.remove('saliendo');
-    if (ev.persisted) { html.classList.remove('cargando'); overlay.classList.add('oculta'); }
-  });
+  iniciarTransicionDeSalida(overlay);
 })();

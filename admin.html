@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3F3F40">
 <link rel="icon" href="assets/img/isotipo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/styles.css">
-<link rel="stylesheet" href="assets/css/admin.css">
+<link rel="stylesheet" href="assets/css/admin.css?v=2">
 </head>
 <body class="admin">
 
@@ -64,6 +64,7 @@
       <nav class="panel__tabs" aria-label="Secciones del panel">
         <button type="button" class="panel__tab activo" data-vista="propiedades">Propiedades</button>
         <button type="button" class="panel__tab" data-vista="metricas">Métricas</button>
+        <button type="button" class="panel__tab" data-vista="cuenta">Cuenta</button>
       </nav>
 
       <div class="panel__acciones">
@@ -156,6 +157,43 @@
 
       <div class="panel__pie">
         <span id="pie-info">—</span>
+      </div>
+
+    </section>
+
+    <!-- ============================================================== CUENTA -->
+    <section class="vista" data-vista-panel="cuenta" hidden>
+
+      <div class="panel__seccion">
+        <div class="cuenta">
+          <div class="cuenta__intro">
+            <h2>Contraseña</h2>
+            <p>Cambiá la contraseña con la que entrás a este panel. Te va a pedir
+               la actual para confirmar que sos vos.</p>
+          </div>
+
+          <form class="cuenta__form" id="form-clave" autocomplete="off">
+            <div class="campo">
+              <label for="clave-actual">Contraseña actual</label>
+              <input type="password" id="clave-actual" autocomplete="current-password" required>
+            </div>
+            <div class="campo">
+              <label for="clave-nueva">Contraseña nueva</label>
+              <input type="password" id="clave-nueva" autocomplete="new-password" minlength="8" required>
+              <span class="campo__ayuda">Mínimo 8 caracteres.</span>
+            </div>
+            <div class="campo">
+              <label for="clave-repetir">Repetir la nueva</label>
+              <input type="password" id="clave-repetir" autocomplete="new-password" minlength="8" required>
+            </div>
+
+            <div class="cuenta__error" id="clave-error" hidden></div>
+
+            <div class="cuenta__acciones">
+              <button class="btn" type="submit" id="btn-clave">Cambiar contraseña</button>
+            </div>
+          </form>
+        </div>
       </div>
 
     </section>
@@ -330,9 +368,9 @@
 
 <div class="aviso-flotante" id="aviso-flotante" hidden></div>
 
-<script src="assets/js/supabase.js"></script>
+<script src="assets/js/supabase.js?v=2"></script>
 <script src="assets/js/analytics.js"></script>
 <script src="assets/js/data.js"></script>
-<script src="assets/js/admin.js"></script>
+<script src="assets/js/admin.js?v=3"></script>
 </body>
 </html>

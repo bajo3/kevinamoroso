@@ -124,6 +124,20 @@
       return sesion.access_token;
     },
 
+    /* Cambia la contraseña del usuario de la sesión abierta. La sesión sigue
+       valiendo después: Supabase no la invalida, así que no hay que volver
+       a entrar. */
+    async cambiarClave(nueva) {
+      const t = await auth.token();
+      if (!t) throw new Error('La sesión venció. Volvé a entrar.');
+      const datos = await pedir('/auth/v1/user', {
+        method: 'PUT',
+        headers: cabeceras({ 'Content-Type': 'application/json' }, t),
+        body: JSON.stringify({ password: nueva })
+      });
+      return datos;
+    },
+
     async salir() {
       const t = sesion && sesion.access_token;
       limpiarSesion();

@@ -10,6 +10,9 @@ body.admin { background: var(--hueso); }
   min-height: 100vh; display: grid; place-items: center; padding: 24px;
   background: var(--hueso);
 }
+/* Sin esto el `display: grid` de arriba le gana al [hidden] del navegador y la
+   pantalla de acceso sigue visible sobre el panel después de entrar. */
+.acceso[hidden] { display: none; }
 .acceso__caja {
   width: 100%; max-width: 400px; background: #fff; border: 1px solid var(--linea);
   border-radius: var(--radio-lg); padding: 40px 34px; box-shadow: var(--sombra-m);
@@ -336,6 +339,21 @@ table.tabla td .pastilla + .pastilla { margin-left: 5px; }
 .aviso-flotante[hidden] { display: none; }
 .aviso-flotante--error { background: #B3261E; }
 @keyframes subir-aviso { from { transform: translate(-50%, 14px); opacity: 0; } }
+
+/* ==========================================================================
+   Cuenta
+   ========================================================================== */
+.cuenta { max-width: 460px; }
+.cuenta__intro h2 { font-size: 19px; letter-spacing: -.01em; margin-bottom: 8px; }
+.cuenta__intro p { font-size: 14px; color: var(--gris); line-height: 1.6; margin-bottom: 26px; }
+.cuenta__form { display: grid; gap: 18px; }
+.cuenta .campo__ayuda { font-size: 12px; color: var(--gris-claro); }
+.cuenta__error {
+  font-size: 14px; color: #B3261E; background: #FDECEA; border: 1px solid #F5C6C2;
+  border-radius: var(--radio); padding: 11px 14px; line-height: 1.5;
+}
+.cuenta__error[hidden] { display: none; }
+.cuenta__acciones { margin-top: 4px; }
 
 /* ==========================================================================
    Adaptación a pantallas chicas

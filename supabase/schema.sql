@@ -5,14 +5,56 @@
 -- Cómo usarlo: Supabase → SQL Editor → New query → pegar TODO → Run.
 -- Se puede volver a ejecutar cuantas veces haga falta: no borra datos.
 --
--- Después de correrlo, un único paso a mano:
---   Authentication → Users → Add user → email + contraseña de Kevin.
---   Ese usuario es el que entra a /admin.
+-- Después de correrlo quedan dos pasos a mano (ver el bloque LISTO del final):
+--   1) Authentication → Users → Add user → email + contraseña de Kevin.
+--   2) Anotar ese usuario en la tabla `admins`.
+--   Sin el paso 2 el usuario entra al panel pero no ve ni toca nada.
 -- ===========================================================================
 
 
 -- ---------------------------------------------------------------------------
--- 1. PROPIEDADES (catálogo)
+-- 1. ADMINS (quién puede usar el panel)
+--
+--    Estar autenticado NO alcanza para administrar el sitio. La anon key
+--    viaja pública en el JavaScript, así que si las políticas se apoyaran
+--    sólo en `authenticated`, a cualquiera que se registre en el proyecto le
+--    quedaría el mismo poder que a Kevin. El permiso se decide acá.
+-- ---------------------------------------------------------------------------
+create table if not exists public.admins (
+  usuario_id uuid primary key references auth.users (id) on delete cascade,
+  email      text,
+  creado_en  timestamptz not null default now()
+);
+
+alter table public.admins enable row level security;
+
+-- Esta tabla no se escribe desde el navegador: se administra sólo desde el
+-- SQL Editor. Cada admin, como mucho, puede ver su propia fila.
+drop policy if exists "admin ve su propia fila" on public.admins;
+create policy "admin ve su propia fila"
+  on public.admins for select
+  to authenticated
+  using (usuario_id = auth.uid());
+
+-- security definer: la función lee `admins` salteando el RLS de esa tabla.
+-- Si no, cada política que la invoca volvería a consultar `admins`, que a su
+-- vez dispara su política, y se cae por recursión.
+create or replace function public.es_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select exists (select 1 from public.admins where usuario_id = auth.uid());
+$$;
+
+revoke all on function public.es_admin() from public, anon;
+grant execute on function public.es_admin() to authenticated;
+
+
+-- ---------------------------------------------------------------------------
+-- 2. PROPIEDADES (catálogo)
 -- ---------------------------------------------------------------------------
 create table if not exists public.propiedades (
   id             text primary key,               -- referencia visible, ej. KA-1001
@@ -70,11 +112,12 @@ create policy "publico ve propiedades publicadas"
   to anon
   using (publicada = true);
 
+-- Sólo los usuarios anotados en `admins`, no cualquiera que se autentique.
 drop policy if exists "panel administra propiedades" on public.propiedades;
 create policy "panel administra propiedades"
   on public.propiedades for all
   to authenticated
-  using (true) with check (true);
+  using (public.es_admin()) with check (public.es_admin());
 
 -- Mantiene actualizado_en al día
 create or replace function public.tocar_actualizado_en()
@@ -91,7 +134,7 @@ create trigger propiedades_actualizado_en
 
 
 -- ---------------------------------------------------------------------------
--- 2. EVENTOS (métricas)
+-- 3. EVENTOS (métricas)
 -- ---------------------------------------------------------------------------
 create table if not exists public.eventos (
   id            bigint generated always as identity primary key,
@@ -124,16 +167,16 @@ create policy "sitio puede insertar eventos"
   to anon
   with check (true);
 
--- La lectura queda reservada al panel (usuario autenticado de Supabase Auth).
+-- La lectura queda reservada a los admins del panel.
 drop policy if exists "panel puede leer eventos" on public.eventos;
 create policy "panel puede leer eventos"
   on public.eventos for select
   to authenticated
-  using (true);
+  using (public.es_admin());
 
 
 -- ---------------------------------------------------------------------------
--- 3. VISTAS DE APOYO (opcionales, para mirar desde el SQL Editor)
+-- 4. VISTAS DE APOYO (opcionales, para mirar desde el SQL Editor)
 --    security_invoker: la vista respeta el RLS de quien consulta, así que
 --    no filtra las métricas a la anon key.
 -- ---------------------------------------------------------------------------
@@ -167,7 +210,7 @@ order by vistas desc;
 
 
 -- ---------------------------------------------------------------------------
--- 4. STORAGE — bucket público `propiedades` para las fotos
+-- 5. STORAGE — bucket público `propiedades` para las fotos
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
@@ -186,29 +229,72 @@ create policy "fotos visibles para todos"
   to anon, authenticated
   using (bucket_id = 'propiedades');
 
--- Sólo el panel (usuario autenticado) sube, reemplaza y borra fotos.
+-- Sólo los admins suben, reemplazan y borran fotos.
 drop policy if exists "panel sube fotos" on storage.objects;
 create policy "panel sube fotos"
   on storage.objects for insert
   to authenticated
-  with check (bucket_id = 'propiedades');
+  with check (bucket_id = 'propiedades' and public.es_admin());
 
 drop policy if exists "panel actualiza fotos" on storage.objects;
 create policy "panel actualiza fotos"
   on storage.objects for update
   to authenticated
-  using (bucket_id = 'propiedades') with check (bucket_id = 'propiedades');
+  using (bucket_id = 'propiedades' and public.es_admin())
+  with check (bucket_id = 'propiedades' and public.es_admin());
 
 drop policy if exists "panel borra fotos" on storage.objects;
 create policy "panel borra fotos"
   on storage.objects for delete
   to authenticated
-  using (bucket_id = 'propiedades');
+  using (bucket_id = 'propiedades' and public.es_admin());
 
 
 -- ---------------------------------------------------------------------------
--- 5. LISTO
---    Falta un solo paso a mano:
---    Authentication → Users → Add user → email + contraseña.
---    Con ese email y esa contraseña se entra a https://kevinamoroso.vercel.app/admin
+-- 6. EL ADMIN DEL PANEL
+--
+--    Poné abajo el email del usuario que administra el sitio y listo: si ese
+--    usuario ya existe en Authentication, queda habilitado solo.
+--
+--    El orden no importa. Si todavía no lo creaste, esto no hace nada y no
+--    falla; creá el usuario en Authentication → Users → Add user y volvé a
+--    ejecutar este archivo entero, que es re-ejecutable a propósito.
+-- ---------------------------------------------------------------------------
+do $$
+declare
+  -- ↓↓↓ EDITAR: el email del usuario de Supabase Auth que entra a /admin ↓↓↓
+  email_admin text := 'kevin@ejemplo.com';
+  encontrado  int;
+begin
+  insert into public.admins (usuario_id, email)
+  select id, email from auth.users where email = email_admin
+  on conflict (usuario_id) do nothing;
+
+  select count(*) into encontrado from public.admins;
+
+  if encontrado = 0 then
+    raise notice 'Sin admins todavía: no existe ningún usuario con el email %. Crealo en Authentication → Users y volvé a correr este archivo.', email_admin;
+  else
+    raise notice 'Listo: % admin(s) habilitado(s) para el panel.', encontrado;
+  end if;
+end $$;
+
+-- Para mirarlo cuando quieras:  select * from public.admins;
+
+
+-- ---------------------------------------------------------------------------
+-- 7. LISTO
+--
+--    Con ese email y esa contraseña se entra a
+--    https://kevinamoroso.vercel.app/admin
+--
+--    Si el usuario existe pero no está en `admins`, el panel no lo deja entrar
+--    y se lo dice: es el comportamiento esperado, no un error.
+--
+--    Queda un solo paso que no se puede hacer desde acá, en el dashboard:
+--    Authentication → Sign In / Providers → Email → desactivar
+--    "Allow new users to sign up". Hoy está habilitado, o sea que cualquiera
+--    puede crearse una cuenta en el proyecto. Con las políticas de arriba ya
+--    no le alcanza para tocar nada, pero no hay motivo para dejar abierto el
+--    registro en un sitio de una sola persona.
 -- ---------------------------------------------------------------------------

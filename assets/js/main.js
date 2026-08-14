@@ -772,7 +772,12 @@
     const arrancar = () => {
       if (encendido) return;   // alEstarListo puede llamar dos veces (evento + red de seguridad)
       encendido = true;
-      video.src = video.dataset.src;
+      // Las fuentes vienen con data-src para que el navegador no las baje antes
+      // de tiempo. Al promoverlas a src, elige la primera que sepa decodificar:
+      // AV1 si puede, H.264 si no.
+      $$('source', video).forEach(fuente => {
+        if (fuente.dataset.src) fuente.src = fuente.dataset.src;
+      });
       video.load();
       const reproducir = video.play();
       if (reproducir && reproducir.catch) reproducir.catch(() => {});
